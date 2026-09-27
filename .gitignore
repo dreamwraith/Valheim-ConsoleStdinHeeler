@@ -1,0 +1,19 @@
+## Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+*.zip
+
+## Visual Studio & Rider
+.vs/
+.idea/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+
+## OS generated files
+.DS_Store
+Thumbs.db
+.dotnet/

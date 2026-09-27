@@ -1,0 +1,156 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <OutputType>Library</OutputType>
+    <AssemblyName>ConsoleStdinHeeler</AssemblyName>
+    <RootNamespace>ConsoleStdinHeeler</RootNamespace>
+    <LangVersion>12.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>$(Version)</AssemblyVersion>
+    <FileVersion>$(Version)</FileVersion>
+    <InformationalVersion>$(Version)</InformationalVersion>
+    <PackageWebsiteUrl>https://github.com/dreamwraith/ConsoleStdinHeeler</PackageWebsiteUrl>
+    <PackageDescription>Enables safe, non-blocking STDIN console input for Valheim dedicated servers with zero CPU overhead.</PackageDescription>
+    <Authors>dreamwraith</Authors>
+    <Company>https://github.com/dreamwraith</Company>
+    <Description>Enables safe, non-blocking STDIN console input for Valheim dedicated servers with zero CPU overhead. For more information, visit https://github.com/dreamwraith</Description>
+    <PackageProjectUrl>https://github.com/dreamwraith</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/dreamwraith</RepositoryUrl>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
+  <!-- Auto-detect GamePath and BepInEx locations -->
+  <PropertyGroup>
+    <!-- 1. Environment variables override -->
+    <GamePath Condition="'$(GamePath)' == '' and '$(VALHEIM_PATH)' != '' and Exists('$(VALHEIM_PATH)')">$(VALHEIM_PATH)</GamePath>
+    <BepInExCorePath Condition="'$(BepInExCorePath)' == '' and '$(BEPINEX_PATH)' != '' and Exists('$(BEPINEX_PATH)')">$(BEPINEX_PATH)</BepInExCorePath>
+
+    <!-- 2. Standard Steam installation paths -->
+    <GamePath Condition="'$(GamePath)' == '' and Exists('C:\Program Files (x86)\Steam\steamapps\common\Valheim')">C:\Program Files (x86)\Steam\steamapps\common\Valheim</GamePath>
+    <GamePath Condition="'$(GamePath)' == '' and Exists('C:\Program Files\Steam\steamapps\common\Valheim')">C:\Program Files\Steam\steamapps\common\Valheim</GamePath>
+    <GamePath Condition="'$(GamePath)' == '' and Exists('D:\SteamLibrary\steamapps\common\Valheim')">D:\SteamLibrary\steamapps\common\Valheim</GamePath>
+
+    <!-- 3. Standard BepInEx core path inside GamePath -->
+    <BepInExCorePath Condition="'$(BepInExCorePath)' == '' and '$(GamePath)' != '' and Exists('$(GamePath)\BepInEx\core')">$(GamePath)\BepInEx\core</BepInExCorePath>
+
+    <ManagedPath>$(GamePath)\valheim_Data\Managed</ManagedPath>
+    <PublicizedPath>$(ManagedPath)\publicized_assemblies</PublicizedPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- BepInEx and Harmony -->
+    <Reference Include="0Harmony">
+      <HintPath Condition="Exists('$(BepInExCorePath)\0Harmony.dll')">$(BepInExCorePath)\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath Condition="Exists('$(BepInExCorePath)\BepInEx.dll')">$(BepInExCorePath)\BepInEx.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <!-- Valheim Game Assemblies -->
+    <Reference Include="assembly_valheim">
+      <HintPath Condition="Exists('$(PublicizedPath)\assembly_valheim_publicized.dll')">$(PublicizedPath)\assembly_valheim_publicized.dll</HintPath>
+      <HintPath Condition="!Exists('$(PublicizedPath)\assembly_valheim_publicized.dll')">$(ManagedPath)\assembly_valheim.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="assembly_utils">
+      <HintPath Condition="Exists('$(PublicizedPath)\assembly_utils_publicized.dll')">$(PublicizedPath)\assembly_utils_publicized.dll</HintPath>
+      <HintPath Condition="!Exists('$(PublicizedPath)\assembly_utils_publicized.dll')">$(ManagedPath)\assembly_utils.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Splatform">
+      <HintPath>$(ManagedPath)\Splatform.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <!-- Unity Engine -->
+    <Reference Include="UnityEngine">
+      <HintPath>$(ManagedPath)\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(ManagedPath)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Generate VersionInfo.g.cs from $(Version) so Plugin.ModVersion is always in sync -->
+  <Target Name="GenerateVersionInfo" BeforeTargets="BeforeCompile;CoreCompile">
+    <PropertyGroup>
+      <VersionInfoFile>$(IntermediateOutputPath)VersionInfo.g.cs</VersionInfoFile>
+    </PropertyGroup>
+    <ItemGroup>
+      <VersionInfoLines Include="// &lt;auto-generated /&gt;" />
+      <VersionInfoLines Include="namespace ConsoleStdinHeeler" />
+      <VersionInfoLines Include="{" />
+      <VersionInfoLines Include="    internal static class VersionInfo" />
+      <VersionInfoLines Include="    {" />
+      <VersionInfoLines Include="        public const string Version = &quot;$(Version)&quot;%3B" />
+      <VersionInfoLines Include="    }" />
+      <VersionInfoLines Include="}" />
+    </ItemGroup>
+    <MakeDir Directories="$(IntermediateOutputPath)" />
+    <WriteLinesToFile File="$(VersionInfoFile)" Lines="@(VersionInfoLines)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <Compile Include="$(VersionInfoFile)" />
+      <FileWrites Include="$(VersionInfoFile)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Keep manifest.json automatically synchronized with $(Version) and package properties -->
+  <Target Name="GenerateManifest" BeforeTargets="BeforeBuild;PackageMod">
+    <ItemGroup>
+      <ManifestLines Include="{" />
+      <ManifestLines Include="%20%20&quot;name&quot;: &quot;$(AssemblyName)&quot;," />
+      <ManifestLines Include="%20%20&quot;version_number&quot;: &quot;$(Version)&quot;," />
+      <ManifestLines Include="%20%20&quot;website_url&quot;: &quot;$(PackageWebsiteUrl)&quot;," />
+      <ManifestLines Include="%20%20&quot;description&quot;: &quot;$(PackageDescription)&quot;," />
+      <ManifestLines Include="%20%20&quot;dependencies&quot;: [" />
+      <ManifestLines Include="%20%20%20%20&quot;denikson-BepInExPack_Valheim-5.4.2350&quot;" />
+      <ManifestLines Include="%20%20]" />
+      <ManifestLines Include="}" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(ProjectDir)manifest.json" Lines="@(ManifestLines)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+  </Target>
+
+  <!-- Create Thunderstore / Hexium distribution package on Release build -->
+  <Target Name="PackageMod" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'" DependsOnTargets="GenerateManifest">
+    <PropertyGroup>
+      <PackageStagingDir>$(ProjectDir)bin\PackageTemp</PackageStagingDir>
+      <PackagePublishDir>$(ProjectDir)bin\Publish</PackagePublishDir>
+      <PackageZipFile>$(PackagePublishDir)\$(AssemblyName)-$(Version).zip</PackageZipFile>
+    </PropertyGroup>
+    <MakeDir Directories="$(PackageStagingDir);$(PackagePublishDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PackageStagingDir)" />
+    <Copy SourceFiles="$(ProjectDir)manifest.json" DestinationFolder="$(PackageStagingDir)" Condition="Exists('$(ProjectDir)manifest.json')" />
+    <Copy SourceFiles="$(ProjectDir)icon.png" DestinationFolder="$(PackageStagingDir)" Condition="Exists('$(ProjectDir)icon.png')" />
+    <Copy SourceFiles="$(ProjectDir)README.md" DestinationFolder="$(PackageStagingDir)" Condition="Exists('$(ProjectDir)README.md')" />
+    <Copy SourceFiles="$(ProjectDir)CHANGELOG.md" DestinationFolder="$(PackageStagingDir)" Condition="Exists('$(ProjectDir)CHANGELOG.md')" />
+    <ZipDirectory SourceDirectory="$(PackageStagingDir)" DestinationFile="$(PackageZipFile)" Overwrite="true" />
+    <RemoveDir Directories="$(PackageStagingDir)" />
+    <Message Importance="High" Text="[PackageMod] Successfully generated mod release package: $(PackageZipFile)" />
+  </Target>
+</Project>

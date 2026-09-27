@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Local developer override template.
+  Copy this file to 'ConsoleStdinHeeler.csproj.user' and adjust the paths
+  to match your local game and BepInEx installation.
+  
+  Note: 'ConsoleStdinHeeler.csproj.user' is ignored by git and will not be committed.
+-->
+<Project>
+  <PropertyGroup>
+    <!-- Path to your Valheim game installation directory -->
+    <GamePath>C:\Program Files (x86)\Steam\steamapps\common\Valheim</GamePath>
+
+    <!-- Path to BepInEx core folder (useful if using mod managers like Gale, Thunderstore, or r2modman) -->
+    <!-- Example standard: $(GamePath)\BepInEx\core -->
+    <!-- Example Gale profile: $(UserProfile)\AppData\Roaming\com.kesomannen.gale\valheim\profiles\<ProfileName>\BepInEx\core -->
+    <!-- Example r2modman / Thunderstore: $(UserProfile)\AppData\Roaming\r2modmanPlus-local\Valheim\profiles\<ProfileName>\BepInEx\core -->
+    <BepInExCorePath>$(GamePath)\BepInEx\core</BepInExCorePath>
+  </PropertyGroup>
+</Project>

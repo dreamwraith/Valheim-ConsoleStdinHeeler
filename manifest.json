@@ -1,0 +1,9 @@
+{
+  "name": "ConsoleStdinHeeler",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/dreamwraith/ConsoleStdinHeeler",
+  "description": "Enables safe, non-blocking STDIN console input for Valheim dedicated servers with zero CPU overhead.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2350"
+  ]
+}
