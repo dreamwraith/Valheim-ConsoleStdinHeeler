@@ -3,9 +3,9 @@ using System.Runtime.InteropServices;
 using ConsoleStdinHeeler;
 
 [assembly: AssemblyTitle("ConsoleStdinHeeler")]
-[assembly: AssemblyDescription("Enables safe, non-blocking STDIN console input for Valheim dedicated servers with zero CPU overhead. For more information, visit https://github.com/dreamwraith")]
+[assembly: AssemblyDescription("Non-blocking STDIN console input and native server management commands for Valheim dedicated servers. For more information, visit https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("dreamwraith (https://github.com/dreamwraith)")]
+[assembly: AssemblyCompany("dreamwraith (https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler)")]
 [assembly: AssemblyProduct("ConsoleStdinHeeler")]
 [assembly: AssemblyCopyright("Copyright © 2026 dreamwraith")]
 [assembly: AssemblyTrademark("")]

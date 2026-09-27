@@ -168,7 +168,7 @@ If run detached without `-i`, the reader detects EOF and terminates the thread.
 
 ## Building from Source
 
-The project uses a portable MSBuild configuration that auto-detects standard Steam paths.
+The project source code is available on [GitHub](https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler) and uses a portable MSBuild configuration that auto-detects standard Steam paths.
 
 ```bash
 dotnet build -c Release
@@ -193,4 +193,4 @@ For non-standard Steam library locations or mod manager profiles, copy `ConsoleS
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0 - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE.md](LICENSE.md) file for details. Source code and issue tracking are available at [https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler](https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler).

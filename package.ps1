@@ -58,7 +58,7 @@ $packageDescNode = $csproj.Project.PropertyGroup | Where-Object { $_.PackageDesc
 $packageDesc = if ($packageDescNode) { $packageDescNode.PackageDescription } else { "Valheim BepInEx mod by dreamwraith." }
 
 $packageUrlNode = $csproj.Project.PropertyGroup | Where-Object { $_.PackageWebsiteUrl } | Select-Object -First 1
-$packageUrl = if ($packageUrlNode) { $packageUrlNode.PackageWebsiteUrl } else { "https://github.com/dreamwraith/$assemblyName" }
+$packageUrl = if ($packageUrlNode) { $packageUrlNode.PackageWebsiteUrl } else { "https://github.com/dreamwraith/Valheim-$assemblyName" }
 
 # 3. Synchronize manifest.json
 $manifestPath = Join-Path $projectDir "manifest.json"

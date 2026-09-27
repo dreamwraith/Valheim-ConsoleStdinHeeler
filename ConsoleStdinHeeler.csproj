@@ -8,17 +8,17 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>
     <InformationalVersion>$(Version)</InformationalVersion>
-    <PackageWebsiteUrl>https://github.com/dreamwraith/ConsoleStdinHeeler</PackageWebsiteUrl>
-    <PackageDescription>Enables safe, non-blocking STDIN console input for Valheim dedicated servers with zero CPU overhead.</PackageDescription>
+    <PackageWebsiteUrl>https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler</PackageWebsiteUrl>
+    <PackageDescription>Non-blocking STDIN console input and native server management commands for Valheim dedicated servers.</PackageDescription>
     <Authors>dreamwraith</Authors>
     <Company>https://github.com/dreamwraith</Company>
-    <Description>Enables safe, non-blocking STDIN console input for Valheim dedicated servers with zero CPU overhead. For more information, visit https://github.com/dreamwraith</Description>
-    <PackageProjectUrl>https://github.com/dreamwraith</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/dreamwraith</RepositoryUrl>
+    <Description>Non-blocking STDIN console input and native server management commands for Valheim dedicated servers. For more information, visit https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler</Description>
+    <PackageProjectUrl>https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
