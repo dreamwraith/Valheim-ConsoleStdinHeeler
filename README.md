@@ -55,7 +55,7 @@ Furthermore:
 - **Center Announcements (`announce` / `broadcast` / `alert`)**: Displays center-screen announcement banners to all players or a targeted player.
 - **Teleportation (`tp` / `teleport`)**: Teleports a player to another player's position or to coordinates (`x,y,z`). Supports quoted names for player names containing spaces.
 - **Player Targeting & `@random`**: Supports `@random` as a player parameter (`tp`, `say`, `announce`, `spawn`, `event`) to select a connected player at random.
-- **Prefab Spawning (`spawn`)**: Spawns prefabs near a player or coordinates with optional quantity and star level parameters, placing entities safely on the surface.
+- **Prefab Spawning (`spawn`)**: Spawns prefabs near a player or coordinates with optional quantity, star level, and silent flag (`-s`), placing entities safely on the surface.
 - **Raid & Event Controls (`event`, `stopevent`, `randomevent`)**: Starts specific or random raids near players or coordinates, or halts active events.
 - **World Time Controls (`tod`, `skiptime`, `sleep`)**: Adjusts time of day (`0.0` to `1.0`), skips forward in seconds, or advances time to morning with client synchronization.
 
@@ -84,7 +84,7 @@ Furthermore:
 | `say` | `<@all/*\|player> <message>` | Displays a top-left notification banner to all clients or a targeted player. |
 | `announce` / `broadcast` / `alert` | `<@all/*\|player> <message>` | Displays a center-screen announcement to all clients or a targeted player. |
 | `tp` / `teleport` | `<player> <target/x,y,z>` | Teleports a player to another player or coordinates. |
-| `spawn` | `<prefab> <player/coords> [amt] [lvl]` | Spawns prefabs near a player or coordinates with count and star level. |
+| `spawn` | `<prefab> <player/coords> [amt] [lvl] [-s]` | Spawns prefabs near a player or coordinates with count, star level, and optional silent mode (`-s`). |
 | `event` | `<name> <player/coords>` | Starts a raid/event near a player or coordinates. |
 | `stopevent` | *(none)* | Stops any currently active raid/event. |
 | `randomevent` | *(none)* | Starts a random raid/event near a player. |

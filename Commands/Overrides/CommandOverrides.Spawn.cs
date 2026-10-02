@@ -9,7 +9,7 @@ namespace ConsoleStdinHeeler
         /// <summary>
         /// Replaces vanilla 'spawn' command on dedicated servers to spawn prefabs (items, creatures, objects)
         /// near a connected player or at specified coordinates with optional count and stars/rank settings.
-        /// Syntax: spawn <prefab> <player|"player name"|coords> [count] [stars/rank]
+        /// Syntax: spawn <prefab> <player|"player name"|coords> [count] [stars/rank] [-s]
         /// </summary>
         public static void HandleSpawnCommand(string arguments)
         {
@@ -21,15 +21,23 @@ namespace ConsoleStdinHeeler
 
             if (string.IsNullOrWhiteSpace(arguments))
             {
-                Plugin.Log.LogWarning("Invalid parameters. Usage: spawn <prefab> <player|\"player name\"|coords> [count] [stars/rank]");
+                Plugin.Log.LogWarning("Invalid parameters. Usage: spawn <prefab> <player|\"player name\"|coords> [count] [stars/rank] [-s]");
                 Plugin.Log.LogInfo("Coordinates must strictly follow 0,0 or 0,0,0 mask with no spaces.");
                 return;
             }
 
             List<string> parts = TerminalUtils.ParseArguments(arguments.Trim());
-            if (parts.Count < 2 || parts.Count > 4)
+
+            bool isSilent = false;
+            if (parts.Count > 0 && parts[parts.Count - 1].Equals("-s", StringComparison.OrdinalIgnoreCase))
             {
-                Plugin.Log.LogWarning("Invalid parameters. Usage: spawn <prefab> <player|\"player name\"|coords> [count] [stars/rank]");
+                isSilent = true;
+                parts.RemoveAt(parts.Count - 1);
+            }
+
+            if (parts.Count < 2 || parts.Count > 4 || parts.Exists(p => p.Equals("-s", StringComparison.OrdinalIgnoreCase)))
+            {
+                Plugin.Log.LogWarning("Invalid parameters. Usage: spawn <prefab> <player|\"player name\"|coords> [count] [stars/rank] [-s]");
                 Plugin.Log.LogInfo("Coordinates must strictly follow 0,0 or 0,0,0 mask with no spaces.");
                 return;
             }
@@ -162,18 +170,22 @@ namespace ConsoleStdinHeeler
                 }
             }
 
-            // Notify player if in range/scene, or via routed RPC if distant
-            if (target.Player != null)
+            // Notify player if in range/scene, or via routed RPC if distant (unless silent mode is active)
+            if (!isSilent)
             {
-                target.Player.Message(MessageHud.MessageType.TopLeft, $"Spawning object {prefab.name}" + (amount > 1 ? $" x{amount}" : ""));
-            }
-            else if (target.Peer != null && ZRoutedRpc.instance != null)
-            {
-                ZRoutedRpc.instance.InvokeRoutedRPC(target.Peer.m_uid, "ShowMessage", (int)MessageHud.MessageType.TopLeft, $"Spawning object {prefab.name}" + (amount > 1 ? $" x{amount}" : ""));
+                if (target.Player != null)
+                {
+                    target.Player.Message(MessageHud.MessageType.TopLeft, $"Spawning object {prefab.name}" + (amount > 1 ? $" x{amount}" : ""));
+                }
+                else if (target.Peer != null && ZRoutedRpc.instance != null)
+                {
+                    ZRoutedRpc.instance.InvokeRoutedRPC(target.Peer.m_uid, "ShowMessage", (int)MessageHud.MessageType.TopLeft, $"Spawning object {prefab.name}" + (amount > 1 ? $" x{amount}" : ""));
+                }
             }
 
             string levelDisplay = level > 1 ? $" (Level {level})" : string.Empty;
-            Plugin.Log.LogInfo($"Spawned {TerminalColor.Green}{prefab.name}{levelDisplay} x{amount}{TerminalColor.Reset} at {locationDescription}.");
+            string silentDisplay = isSilent ? $" {TerminalColor.Gray}(silent){TerminalColor.Reset}" : string.Empty;
+            Plugin.Log.LogInfo($"Spawned {TerminalColor.Green}{prefab.name}{levelDisplay} x{amount}{TerminalColor.Reset} at {locationDescription}{silentDisplay}.");
         }
     }
 }

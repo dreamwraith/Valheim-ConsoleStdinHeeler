@@ -36,7 +36,7 @@ namespace ConsoleStdinHeeler
             ("stopevent", "Stop any currently active raid/event"),
             ("randomevent", "Start a random raid/event near a player"),
             ("pevents [list/start/stop/here]", "Manage player events and raids (subcommands: list, start, stop, here)"),
-            ("spawn <prefab> <target/x,y,z> [amt] [lvl]", "Spawn near a player or coordinates (e.g. spawn Boar Thor 3 2)"),
+            ("spawn <prefab> <target/x,y,z> [amt] [lvl] [-s]", "Spawn near a player or coordinates (e.g. spawn Boar Thor 3 2 -s)"),
             ("listkeys", "List active world progress keys, modifiers, and presets"),
             ("setkey <name>", "Set a global world progress key (e.g. boss keys)"),
             ("removekey <name>", "Remove an active global world progress key"),
