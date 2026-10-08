@@ -134,7 +134,7 @@ try {
         -Method Post -Headers $authHeader -ContentType "application/json" -Body $submitJson
 
     Write-Host "`nSuccessfully published to Hexium!" -ForegroundColor Green
-    Write-Host "Mod URL: https://$Community.hexium.gg/" -ForegroundColor Cyan
+    Write-Host "Mod URL: https://$Community.hexium.gg/mods/$Namespace/$pkgName" -ForegroundColor Cyan
 } catch {
     $errMsg = if ($_.ErrorDetails) { $_.ErrorDetails.Message } else { $_.Exception.Message }
     Write-Error "Hexium upload failed:`n$errMsg"

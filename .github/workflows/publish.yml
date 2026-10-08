@@ -24,7 +24,7 @@ jobs:
     env:
       THUNDERSTORE_TOKEN: ${{ secrets.THUNDERSTORE_TOKEN }}
       HEXIUM_TOKEN: ${{ secrets.HEXIUM_TOKEN }}
-      COMMUNITY_NAMESPACE: ${{ secrets.COMMUNITY_NAMESPACE || secrets.THUNDERSTORE_NAMESPACE || secrets.HEXIUM_NAMESPACE }}
+      COMMUNITY_NAMESPACE: ${{ vars.COMMUNITY_NAMESPACE || secrets.COMMUNITY_NAMESPACE || secrets.THUNDERSTORE_NAMESPACE || secrets.HEXIUM_NAMESPACE }}
       COMMUNITY: ${{ secrets.COMMUNITY || 'valheim' }}
 
     steps:

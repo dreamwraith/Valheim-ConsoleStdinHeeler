@@ -75,11 +75,32 @@ try {
     exit 1
 }
 
-# 2. Check and Synchronize GitHub Actions Secrets
-Write-Host "`n[Prerequisite] Verifying GitHub Actions secrets..." -ForegroundColor Cyan
+# 2. Check and Synchronize GitHub Actions Variables & Secrets
+Write-Host "`n[Prerequisite] Verifying GitHub Actions variables and secrets..." -ForegroundColor Cyan
 try {
+    # Public variables (not masked in logs)
+    $existingVars = @(& gh variable list --json name -q ".[].name" 2>$null)
+    $nsVal = [Environment]::GetEnvironmentVariable("COMMUNITY_NAMESPACE", "Process")
+    if (-not $nsVal) { $nsVal = [Environment]::GetEnvironmentVariable("COMMUNITY_NAMESPACE", "User") }
+    if ($nsVal) {
+        if ($existingVars -notcontains "COMMUNITY_NAMESPACE" -or $SyncSecrets) {
+            if ($DryRun) {
+                Write-Host "   [DRY RUN] Would sync variable 'COMMUNITY_NAMESPACE' to GitHub repository." -ForegroundColor Yellow
+            } else {
+                Write-Host "   Syncing variable 'COMMUNITY_NAMESPACE' to GitHub repository..." -ForegroundColor Cyan
+                $null = gh variable set COMMUNITY_NAMESPACE --body $nsVal 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Host "   ✓ Variable 'COMMUNITY_NAMESPACE' synchronized to GitHub." -ForegroundColor Green
+                }
+            }
+        } else {
+            Write-Host "   ✓ Variable 'COMMUNITY_NAMESPACE' is configured on GitHub." -ForegroundColor DarkGreen
+        }
+    }
+
+    # Sensitive tokens (masked in logs)
     $existingSecrets = @(& gh secret list --json name -q ".[].name" 2>$null)
-    $candidateSecrets = @("COMMUNITY_NAMESPACE", "THUNDERSTORE_TOKEN", "HEXIUM_TOKEN")
+    $candidateSecrets = @("THUNDERSTORE_TOKEN", "HEXIUM_TOKEN")
 
     foreach ($sec in $candidateSecrets) {
         $val = [Environment]::GetEnvironmentVariable($sec, "Process")
@@ -107,7 +128,7 @@ try {
         }
     }
 } catch {
-    Write-Warning "Could not query or synchronize GitHub repository secrets: $_"
+    Write-Warning "Could not query or synchronize GitHub repository configuration: $_"
 }
 
 # 3. Check Git Status (Working Directory)
