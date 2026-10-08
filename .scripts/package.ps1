@@ -5,15 +5,23 @@ param(
 
     [string]$SetVersion,
 
-    [string]$Configuration = "Release"
+    [string]$Configuration = "Release",
+
+    [switch]$CreateSourceArchive,
+
+    [string]$ProjectDir
 )
 
 $ErrorActionPreference = "Stop"
+$ProgressPreference = "SilentlyContinue"
 
-$projectDir = $PSScriptRoot
-$csprojFile = Get-ChildItem -Path $projectDir -Filter "*.csproj" | Select-Object -First 1
+if (-not $ProjectDir) {
+    $ProjectDir = if ($PSScriptRoot) { Split-Path $PSScriptRoot -Parent } else { (Get-Location).Path }
+}
+
+$csprojFile = Get-ChildItem -Path $ProjectDir -Filter "*.csproj" | Select-Object -First 1
 if (-not $csprojFile) {
-    Write-Error "Could not find a .csproj file in '$projectDir'."
+    Write-Error "Could not find a .csproj file in '$ProjectDir'."
     exit 1
 }
 $csprojPath = $csprojFile.FullName
@@ -48,20 +56,34 @@ if ($newVersion -and $newVersion -ne $currentVersion) {
     $versionNode.Version = $newVersion
     $csproj.Save($csprojPath)
     $currentVersion = $newVersion
+} else {
+    Write-Host "Using existing project version: $currentVersion (from $($csprojFile.Name))" -ForegroundColor Cyan
 }
 
 # 2. Extract AssemblyName and Package Metadata
 $assemblyName = ($csproj.Project.PropertyGroup | Where-Object { $_.AssemblyName } | Select-Object -First 1).AssemblyName
 if (-not $assemblyName) { $assemblyName = [System.IO.Path]::GetFileNameWithoutExtension($csprojPath) }
 
+$authorNode = $csproj.Project.PropertyGroup | Where-Object { $_.Authors } | Select-Object -First 1
+$author = if ($authorNode -and $authorNode.Authors) { $authorNode.Authors } elseif ($env:MOD_AUTHOR) { $env:MOD_AUTHOR } else { "ModAuthor" }
+
 $packageDescNode = $csproj.Project.PropertyGroup | Where-Object { $_.PackageDescription } | Select-Object -First 1
-$packageDesc = if ($packageDescNode) { $packageDescNode.PackageDescription } else { "Valheim BepInEx mod by dreamwraith." }
+$packageDesc = if ($packageDescNode) { $packageDescNode.PackageDescription } else { "Valheim BepInEx mod by $author." }
 
 $packageUrlNode = $csproj.Project.PropertyGroup | Where-Object { $_.PackageWebsiteUrl } | Select-Object -First 1
-$packageUrl = if ($packageUrlNode) { $packageUrlNode.PackageWebsiteUrl } else { "https://github.com/dreamwraith/Valheim-$assemblyName" }
+$repoUrlNode = $csproj.Project.PropertyGroup | Where-Object { $_.RepositoryUrl } | Select-Object -First 1
+$packageUrl = if ($packageUrlNode -and $packageUrlNode.PackageWebsiteUrl) {
+    $packageUrlNode.PackageWebsiteUrl
+} elseif ($repoUrlNode -and $repoUrlNode.RepositoryUrl) {
+    $repoUrlNode.RepositoryUrl
+} elseif ($env:GITHUB_SERVER_URL -and $env:GITHUB_REPOSITORY) {
+    "$($env:GITHUB_SERVER_URL)/$($env:GITHUB_REPOSITORY)"
+} else {
+    ""
+}
 
 # 3. Synchronize manifest.json
-$manifestPath = Join-Path $projectDir "manifest.json"
+$manifestPath = Join-Path $ProjectDir "manifest.json"
 $dependencies = @("denikson-BepInExPack_Valheim-5.4.2350")
 if (Test-Path $manifestPath) {
     try {
@@ -83,7 +105,7 @@ $manifestJson = $manifestData | ConvertTo-Json -Depth 4
 [System.IO.File]::WriteAllText($manifestPath, $manifestJson + [Environment]::NewLine)
 
 # 4. Synchronize obj\VersionInfo.g.cs
-$objDir = Join-Path $projectDir "obj"
+$objDir = Join-Path $ProjectDir "obj"
 if (-not (Test-Path $objDir)) { New-Item -ItemType Directory -Path $objDir | Out-Null }
 $versionInfoPath = Join-Path $objDir "VersionInfo.g.cs"
 $versionInfoContent = @"
@@ -99,9 +121,9 @@ namespace $assemblyName
 [System.IO.File]::WriteAllText($versionInfoPath, $versionInfoContent + [Environment]::NewLine)
 
 # 5. Check DLL Location
-$dllSource = Join-Path $projectDir "bin\$Configuration\net48\$assemblyName.dll"
+$dllSource = Join-Path $ProjectDir "bin\$Configuration\net48\$assemblyName.dll"
 if (-not (Test-Path $dllSource)) {
-    $dllSource = Join-Path $projectDir "bin\$Configuration\$assemblyName.dll"
+    $dllSource = Join-Path $ProjectDir "bin\$Configuration\$assemblyName.dll"
 }
 
 if (-not (Test-Path $dllSource)) {
@@ -110,8 +132,8 @@ if (-not (Test-Path $dllSource)) {
 }
 
 # 6. Assemble Zip Package
-$outputDir = Join-Path $projectDir "bin\Publish"
-$stagingDir = Join-Path $projectDir "bin\PackageTemp"
+$outputDir = Join-Path $ProjectDir "bin\Publish"
+$stagingDir = Join-Path $ProjectDir "bin\PackageTemp"
 $zipFile = Join-Path $outputDir "$assemblyName-$currentVersion.zip"
 
 if (Test-Path $stagingDir) { Remove-Item -Recurse -Force $stagingDir }
@@ -121,14 +143,14 @@ New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
 
 Copy-Item $dllSource -Destination $stagingDir
 Copy-Item $manifestPath -Destination $stagingDir
-if (Test-Path (Join-Path $projectDir "icon.png")) {
-    Copy-Item (Join-Path $projectDir "icon.png") -Destination $stagingDir
+if (Test-Path (Join-Path $ProjectDir "icon.png")) {
+    Copy-Item (Join-Path $ProjectDir "icon.png") -Destination $stagingDir
 }
-if (Test-Path (Join-Path $projectDir "README.md")) {
-    Copy-Item (Join-Path $projectDir "README.md") -Destination $stagingDir
+if (Test-Path (Join-Path $ProjectDir "README.md")) {
+    Copy-Item (Join-Path $ProjectDir "README.md") -Destination $stagingDir
 }
 
-$changelog = Join-Path $projectDir "CHANGELOG.md"
+$changelog = Join-Path $ProjectDir "CHANGELOG.md"
 if (Test-Path $changelog) {
     Copy-Item $changelog -Destination $stagingDir
 }
@@ -136,6 +158,48 @@ if (Test-Path $changelog) {
 Compress-Archive -Path "$stagingDir\*" -DestinationPath $zipFile -Force
 Remove-Item -Recurse -Force $stagingDir
 
+$sourceZip = $null
+if ($CreateSourceArchive) {
+    $sourceZip = Join-Path $outputDir "$assemblyName-$currentVersion-Source.zip"
+    if (Test-Path $sourceZip) { Remove-Item -Force $sourceZip }
+    Write-Host "Creating source code archive: $sourceZip" -ForegroundColor Cyan
+    git -C $ProjectDir archive --format=zip -o $sourceZip HEAD
+}
+
+# 7. Extract Release Notes from CHANGELOG.md for current version
+$notes = ""
+if (Test-Path $changelog) {
+    $lines = Get-Content $changelog
+    $inSection = $false
+    $excerpt = [System.Collections.Generic.List[string]]::new()
+    $escapedVer = [regex]::Escape($currentVersion)
+
+    foreach ($line in $lines) {
+        if ($line -match "^##\s+\[?$escapedVer(\]|\s|$)") {
+            $inSection = $true
+            continue
+        }
+        if ($inSection) {
+            if ($line -match "^##\s+") {
+                break
+            }
+            $excerpt.Add($line)
+        }
+    }
+    $notes = ($excerpt -join "`n").Trim()
+}
+
+if (-not $notes) {
+    $notes = "Release v$currentVersion"
+}
+
+$notesPath = Join-Path $outputDir "release_notes.md"
+[System.IO.File]::WriteAllText($notesPath, $notes + [Environment]::NewLine)
+
 Write-Host "`nMod package successfully created for v$currentVersion!" -ForegroundColor Green
 Write-Host "Location: $zipFile" -ForegroundColor Cyan
+if ($sourceZip) {
+    Write-Host "Source:   $sourceZip" -ForegroundColor Cyan
+}
+Write-Host "Notes:    $notesPath" -ForegroundColor Cyan
 return $zipFile

@@ -8,7 +8,7 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <Version>1.0.2</Version>
+    <Version>1.1.0</Version>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>
     <InformationalVersion>$(Version)</InformationalVersion>
@@ -137,7 +137,7 @@
   </Target>
 
   <!-- Create Thunderstore / Hexium distribution package on Release build -->
-  <Target Name="PackageMod" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'" DependsOnTargets="GenerateManifest">
+  <Target Name="PackageMod" AfterTargets="Build" Condition="'$(Configuration)' == 'Release' and '$(SkipPackageMod)' != 'true'" DependsOnTargets="GenerateManifest">
     <PropertyGroup>
       <PackageStagingDir>$(ProjectDir)bin\PackageTemp</PackageStagingDir>
       <PackagePublishDir>$(ProjectDir)bin\Publish</PackagePublishDir>

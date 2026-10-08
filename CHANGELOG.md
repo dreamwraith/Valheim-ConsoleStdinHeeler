@@ -5,6 +5,13 @@ All notable changes to **ConsoleStdinHeeler** will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-10-08
+
+### Added
+- Persistent center-screen announcements via optional `-t <seconds>` flag for `announce`, `broadcast`, and `alert` commands (capped at 60s), refreshed every 1.0s via a non-blocking coroutine to eliminate banner fading.
+- Announcement cancellation support (`announce cancel` / `announce abort`) to immediately terminate active announcement pulses.
+- Updated dedicated server `help` catalog and documentation for `-t` flag and cancellation syntax.
+
 ## [1.0.2] - 2026-10-02
 
 ### Added

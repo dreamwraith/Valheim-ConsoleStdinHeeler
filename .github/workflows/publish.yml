@@ -1,0 +1,81 @@
+name: Publish Mod to Portals
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release tag to publish (e.g. v1.0.1; leave blank to publish latest)'
+        required: false
+        default: ''
+      dry_run:
+        description: 'Dry run publishing (validates package without uploading to portals)'
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish-portals:
+    runs-on: windows-latest
+    env:
+      THUNDERSTORE_TOKEN: ${{ secrets.THUNDERSTORE_TOKEN }}
+      HEXIUM_TOKEN: ${{ secrets.HEXIUM_TOKEN }}
+      COMMUNITY_NAMESPACE: ${{ secrets.COMMUNITY_NAMESPACE || secrets.THUNDERSTORE_NAMESPACE || secrets.HEXIUM_NAMESPACE }}
+      COMMUNITY: ${{ secrets.COMMUNITY || 'valheim' }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Release Package
+        id: download_asset
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = ""
+          if ("${{ inputs.tag_name }}") {
+              $tag = "${{ inputs.tag_name }}"
+          } elseif ("${{ github.event_name }}" -eq "release") {
+              $tag = "${{ github.event.release.tag_name }}"
+          } else {
+              $tag = (gh release view --json tagName -q .tagName)
+          }
+
+          if (-not $tag) {
+              Write-Error "No release tag found. Trigger this workflow via a published release or specify tag_name."
+              exit 1
+          }
+
+          Write-Host "Downloading release assets for tag $tag..." -ForegroundColor Cyan
+          $destDir = Join-Path $PWD "bin\DownloadTemp"
+          New-Item -ItemType Directory -Force -Path $destDir | Out-Null
+
+          gh release download $tag --pattern "*.zip" --dir $destDir
+          
+          $modZip = Get-ChildItem -Path $destDir -Filter "*.zip" | Where-Object { $_.Name -notlike "*-Source.zip" } | Select-Object -First 1
+          if (-not $modZip) {
+              Write-Error "Could not locate mod distribution package zip in release assets."
+              exit 1
+          }
+
+          Write-Host "Found release package: $($modZip.FullName)" -ForegroundColor Green
+          "package_zip=$($modZip.FullName)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Publish to Thunderstore
+        if: ${{ env.THUNDERSTORE_TOKEN != '' }}
+        shell: pwsh
+        run: |
+          $dryRunFlag = if ("${{ inputs.dry_run }}" -eq "true") { @("-DryRun") } else { @() }
+          pwsh ./.scripts/publish-thunderstore.ps1 -PackagePath "${{ steps.download_asset.outputs.package_zip }}" @dryRunFlag
+
+      - name: Publish to Hexium
+        if: ${{ env.HEXIUM_TOKEN != '' }}
+        shell: pwsh
+        run: |
+          $dryRunFlag = if ("${{ inputs.dry_run }}" -eq "true") { @("-DryRun") } else { @() }
+          pwsh ./.scripts/publish-hexium.ps1 -PackagePath "${{ steps.download_asset.outputs.package_zip }}" @dryRunFlag

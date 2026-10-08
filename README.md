@@ -52,7 +52,7 @@ Furthermore:
 ### Remote In-Game Notifications & Controls
 
 - **Banner Notifications (`say`)**: Sends top-left notification banners to all players (`@all` or `*`) or a targeted player via `ZRoutedRpc`.
-- **Center Announcements (`announce` / `broadcast` / `alert`)**: Displays center-screen announcement banners to all players or a targeted player.
+- **Center Announcements (`announce` / `broadcast` / `alert`)**: Displays center-screen announcement banners to all players or a targeted player. Supports optional persistence duration via `-t <seconds>` (up to 60s) refreshed every second without fading, and cancellation (`announce cancel`).
 - **Teleportation (`tp` / `teleport`)**: Teleports a player to another player's position or to coordinates (`x,y,z`). Supports quoted names for player names containing spaces.
 - **Player Targeting & `@random`**: Supports `@random` as a player parameter (`tp`, `say`, `announce`, `spawn`, `event`) to select a connected player at random.
 - **Prefab Spawning (`spawn`)**: Spawns prefabs near a player or coordinates with optional quantity, star level, and silent flag (`-s`), placing entities safely on the surface.
@@ -82,7 +82,7 @@ Furthermore:
 | `unban` | `<name/ip/userID>` | Removes a player from the ban list. |
 | `banned` | *(none)* | Displays the current ban list. |
 | `say` | `<@all/*\|player> <message>` | Displays a top-left notification banner to all clients or a targeted player. |
-| `announce` / `broadcast` / `alert` | `<@all/*\|player> <message>` | Displays a center-screen announcement to all clients or a targeted player. |
+| `announce` / `broadcast` / `alert` | `[-t sec] <@all/*\|player> <message>` / `cancel` | Displays a center-screen announcement (optional `-t` persistence up to 60s, or `cancel`). |
 | `tp` / `teleport` | `<player> <target/x,y,z>` | Teleports a player to another player or coordinates. |
 | `spawn` | `<prefab> <player/coords> [amt] [lvl] [-s]` | Spawns prefabs near a player or coordinates with count, star level, and optional silent mode (`-s`). |
 | `event` | `<name> <player/coords>` | Starts a raid/event near a player or coordinates. |
@@ -174,7 +174,7 @@ The project source code is available on [GitHub](https://github.com/dreamwraith/
 dotnet build -c Release
 ```
 
-The compiled assembly will be placed in `bin/Release/net48/ConsoleStdinHeeler.dll`.
+The compiled assembly will be placed in `bin/Release/net48/ConsoleStdinHeeler.dll`. Building in `Release` configuration also automatically packages the distribution ZIP to `bin/Publish/ConsoleStdinHeeler-<Version>.zip`.
 
 ### Custom & CI Paths
 For non-standard Steam library locations or mod manager profiles, copy `ConsoleStdinHeeler.csproj.user.example` to `ConsoleStdinHeeler.csproj.user` in the project root (this file is git-ignored and automatically loaded by MSBuild):
@@ -188,6 +188,19 @@ For non-standard Steam library locations or mod manager profiles, copy `ConsoleS
   </PropertyGroup>
 </Project>
 ```
+
+---
+
+## Packaging, Publishing & Releases
+
+All developer automation tools for release management, packaging, and publishing to **Thunderstore** and **Hexium** are organized in the [`.scripts/`](.scripts/) folder:
+
+- **Release Management**: [`release.ps1`](.scripts/release.ps1) compiles in `Release`, creates mod & source archives, extracts changelog notes, and publishes GitHub Releases (Draft by default, or published with `-Publish`) using the `gh` CLI.
+- **Packaging & Version Bumping**: [`package.ps1`](.scripts/package.ps1) increments SemVer in `ConsoleStdinHeeler.csproj`, updates `manifest.json`, and bundles distribution archives.
+- **Portal Publishing**: [`publish.ps1`](.scripts/publish.ps1) uploads directly to Thunderstore and Hexium APIs.
+- **CI/CD Workflow**: [`.github/workflows/publish.yml`](.github/workflows/publish.yml) provides an automated GitHub Actions workflow to publish to Thunderstore and Hexium whenever a GitHub Release is published.
+
+For detailed documentation on flags, workflows, and secret configuration, see [`.scripts/README.md`](.scripts/README.md).
 
 ---
 
