@@ -1,6 +1,6 @@
 {
   "name": "ConsoleStdinHeeler",
-  "version_number": "1.1.1",
+  "version_number": "1.1.2",
   "website_url": "https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler",
   "description": "Non-blocking STDIN console input and native server management commands for Valheim dedicated servers.",
   "dependencies": [
