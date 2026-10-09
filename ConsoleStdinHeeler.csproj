@@ -8,7 +8,7 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>
     <InformationalVersion>$(Version)</InformationalVersion>
@@ -19,8 +19,11 @@
     <Description>Non-blocking STDIN console input and native server management commands for Valheim dedicated servers. For more information, visit https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler</Description>
     <PackageProjectUrl>https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler</PackageProjectUrl>
     <RepositoryUrl>https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler</RepositoryUrl>
+    <!-- Nexus Mods Identifiers -->
+    <NexusModId>4329</NexusModId>
+    <NexusFileId>
+    </NexusFileId>
   </PropertyGroup>
-
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
@@ -30,7 +33,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
@@ -40,25 +42,20 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-
   <!-- Auto-detect GamePath and BepInEx locations -->
   <PropertyGroup>
     <!-- 1. Environment variables override -->
     <GamePath Condition="'$(GamePath)' == '' and '$(VALHEIM_PATH)' != '' and Exists('$(VALHEIM_PATH)')">$(VALHEIM_PATH)</GamePath>
     <BepInExCorePath Condition="'$(BepInExCorePath)' == '' and '$(BEPINEX_PATH)' != '' and Exists('$(BEPINEX_PATH)')">$(BEPINEX_PATH)</BepInExCorePath>
-
     <!-- 2. Standard Steam installation paths -->
     <GamePath Condition="'$(GamePath)' == '' and Exists('C:\Program Files (x86)\Steam\steamapps\common\Valheim')">C:\Program Files (x86)\Steam\steamapps\common\Valheim</GamePath>
     <GamePath Condition="'$(GamePath)' == '' and Exists('C:\Program Files\Steam\steamapps\common\Valheim')">C:\Program Files\Steam\steamapps\common\Valheim</GamePath>
     <GamePath Condition="'$(GamePath)' == '' and Exists('D:\SteamLibrary\steamapps\common\Valheim')">D:\SteamLibrary\steamapps\common\Valheim</GamePath>
-
     <!-- 3. Standard BepInEx core path inside GamePath -->
     <BepInExCorePath Condition="'$(BepInExCorePath)' == '' and '$(GamePath)' != '' and Exists('$(GamePath)\BepInEx\core')">$(GamePath)\BepInEx\core</BepInExCorePath>
-
     <ManagedPath>$(GamePath)\valheim_Data\Managed</ManagedPath>
     <PublicizedPath>$(ManagedPath)\publicized_assemblies</PublicizedPath>
   </PropertyGroup>
-
   <ItemGroup>
     <!-- BepInEx and Harmony -->
     <Reference Include="0Harmony">
@@ -69,7 +66,6 @@
       <HintPath Condition="Exists('$(BepInExCorePath)\BepInEx.dll')">$(BepInExCorePath)\BepInEx.dll</HintPath>
       <Private>False</Private>
     </Reference>
-
     <!-- Valheim Game Assemblies -->
     <Reference Include="assembly_valheim">
       <HintPath Condition="Exists('$(PublicizedPath)\assembly_valheim_publicized.dll')">$(PublicizedPath)\assembly_valheim_publicized.dll</HintPath>
@@ -85,7 +81,6 @@
       <HintPath>$(ManagedPath)\Splatform.dll</HintPath>
       <Private>False</Private>
     </Reference>
-
     <!-- Unity Engine -->
     <Reference Include="UnityEngine">
       <HintPath>$(ManagedPath)\UnityEngine.dll</HintPath>
@@ -96,7 +91,6 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-
   <!-- Generate VersionInfo.g.cs from $(Version) so Plugin.ModVersion is always in sync -->
   <Target Name="GenerateVersionInfo" BeforeTargets="BeforeCompile;CoreCompile">
     <PropertyGroup>
@@ -119,7 +113,6 @@
       <FileWrites Include="$(VersionInfoFile)" />
     </ItemGroup>
   </Target>
-
   <!-- Keep manifest.json automatically synchronized with $(Version) and package properties -->
   <Target Name="GenerateManifest" BeforeTargets="BeforeBuild;PackageMod">
     <ItemGroup>
@@ -135,7 +128,6 @@
     </ItemGroup>
     <WriteLinesToFile File="$(ProjectDir)manifest.json" Lines="@(ManifestLines)" Overwrite="true" WriteOnlyWhenDifferent="true" />
   </Target>
-
   <!-- Create Thunderstore / Hexium distribution package on Release build -->
   <Target Name="PackageMod" AfterTargets="Build" Condition="'$(Configuration)' == 'Release' and '$(SkipPackageMod)' != 'true'" DependsOnTargets="GenerateManifest">
     <PropertyGroup>

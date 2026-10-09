@@ -6,6 +6,7 @@
 [![Publish Status](https://img.shields.io/github/actions/workflow/status/dreamwraith/Valheim-ConsoleStdinHeeler/publish.yml?label=Publish%20Portals&logo=githubactions)](https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler/actions)
 [![Thunderstore](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fthunderstore.io%2Fapi%2Fexperimental%2Fpackage%2FDreamWraith%2FConsoleStdinHeeler%2F&query=%24.latest.version_number&label=Thunderstore&logo=thunderstore&color=2980b9)](https://thunderstore.io/c/valheim/p/DreamWraith/ConsoleStdinHeeler/)
 [![Hexium](https://img.shields.io/badge/Hexium-ConsoleStdinHeeler-6c5ce7)](https://valheim.hexium.gg/mods/DreamWraith/ConsoleStdinHeeler)
+[![Nexus Mods](https://img.shields.io/badge/Nexus_Mods-4329-da8e35?logo=nexusmods&logoColor=white)](https://www.nexusmods.com/valheim/mods/4329)
 [![Game: Valheim](https://img.shields.io/badge/Valheim-Deep_North_%2F_1.x-1b2838?logo=steam&logoColor=white)](https://store.steampowered.com/app/892970/Valheim/)
 [![BepInEx Pack](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fthunderstore.io%2Fapi%2Fexperimental%2Fpackage%2Fdenikson%2FBepInExPack_Valheim%2F&query=%24.latest.version_number&label=BepInEx&color=5B57E7)](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim/)
 [![Target: .NET 4.8](https://img.shields.io/badge/.NET%20Framework-4.8-512BD4?logo=dotnet)](ConsoleStdinHeeler.csproj)
@@ -206,14 +207,14 @@ For non-standard Steam library locations or mod manager profiles, copy `ConsoleS
 
 ## Packaging, Publishing & Releases
 
-All developer automation tools for release management, packaging, and publishing to **Thunderstore** and **Hexium** are organized in the [`.scripts/`](.scripts/) folder:
+All developer automation tools for release management, packaging, and publishing to **Thunderstore**, **Hexium**, and **Nexus Mods** are consolidated into the single PowerShell 7 entrypoint [.scripts/modtools.ps1](.scripts/modtools.ps1), powered by the shared [**DW.ValheimModTools**](https://github.com/DreamWraith/DW-ValheimModTools) module:
 
-- **Release Management**: [`release.ps1`](.scripts/release.ps1) compiles in `Release`, creates mod & source archives, extracts changelog notes, and publishes GitHub Releases (Draft by default, or published with `-Publish`) using the `gh` CLI.
-- **Packaging & Version Bumping**: [`package.ps1`](.scripts/package.ps1) increments SemVer in `ConsoleStdinHeeler.csproj`, updates `manifest.json`, and bundles distribution archives.
-- **Portal Publishing**: [`publish.ps1`](.scripts/publish.ps1) uploads directly to Thunderstore and Hexium APIs.
-- **CI/CD Workflow**: [`.github/workflows/publish.yml`](.github/workflows/publish.yml) provides an automated GitHub Actions workflow to publish to Thunderstore and Hexium whenever a GitHub Release is published.
+- **Release Management**: pwsh ./.scripts/modtools.ps1 release compiles in Release, creates mod & source archives, extracts changelog notes, and publishes GitHub Releases (Draft by default, or published with -Publish) using the gh CLI.
+- **Packaging & Version Bumping**: pwsh ./.scripts/modtools.ps1 package -Bump Patch increments SemVer in ConsoleStdinHeeler.csproj, updates manifest.json, and bundles distribution archives.
+- **Portal Publishing**: pwsh ./.scripts/modtools.ps1 publish -Target All uploads directly to Thunderstore, Hexium, and Nexus Mods APIs.
+- **CI/CD Workflow**: [.github/workflows/publish.yml](.github/workflows/publish.yml) provides an automated GitHub Actions workflow to publish to Thunderstore, Hexium, and Nexus Mods whenever a GitHub Release is published.
 
-For detailed documentation on flags, workflows, and secret configuration, see [`.scripts/README.md`](.scripts/README.md).
+For detailed documentation on flags, workflows, and secret configuration, see [.scripts/README.md](.scripts/README.md).
 
 ---
 
@@ -221,3 +222,4 @@ For detailed documentation on flags, workflows, and secret configuration, see [`
 - This project is licensed under the GNU General Public License v3.0 - see the [LICENSE.md](LICENSE.md) file for details. Source code and issue tracking are available at [https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler](https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler).
 - [**A Small Note from Me about Valheim Modding Specifically**](https://gist.github.com/dreamwraith/98564f8441dc234bfadd7e2b605c694c) - Thoughts on open-source modding, community inclusivity, and anti-gatekeeping.
 - [**A Note on AI, Software Craft, and Why This Code Exists**](https://gist.github.com/dreamwraith/77c91d656c842611bf8c40febf8056f2) - Personal essay on software craft, human agency, and engineering responsibility.
+

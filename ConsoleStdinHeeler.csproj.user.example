@@ -16,5 +16,9 @@
     <!-- Example Gale profile: $(UserProfile)\AppData\Roaming\com.kesomannen.gale\valheim\profiles\<ProfileName>\BepInEx\core -->
     <!-- Example r2modman / Thunderstore: $(UserProfile)\AppData\Roaming\r2modmanPlus-local\Valheim\profiles\<ProfileName>\BepInEx\core -->
     <BepInExCorePath>$(GamePath)\BepInEx\core</BepInExCorePath>
+      <!-- Optional: Override Nexus Mods mod or file IDs locally -->
+    <!-- <NexusModId>4329</NexusModId> -->
+    <!-- <NexusFileId>12345</NexusFileId> -->
   </PropertyGroup>
 </Project>
+

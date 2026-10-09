@@ -5,6 +5,12 @@ All notable changes to **ConsoleStdinHeeler** will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-10-08
+
+### Changed
+- Centralized build and release automation tooling to shared `DW.ValheimModTools`.
+- Added support for automated Nexus Mods packaging and publishing.
+
 ## [1.1.0] - 2026-10-08
 
 ### Added
