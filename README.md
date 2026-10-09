@@ -1,5 +1,18 @@
 # ConsoleStdinHeeler
 
+[![GitHub Release](https://img.shields.io/github/v/release/dreamwraith/Valheim-ConsoleStdinHeeler?logo=github&color=1081c2)](https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler/releases)
+[![GitHub Downloads](https://img.shields.io/github/downloads/dreamwraith/Valheim-ConsoleStdinHeeler/total?logo=github&color=1081c2)](https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler/releases)
+[![Last Commit](https://img.shields.io/github/last-commit/dreamwraith/Valheim-ConsoleStdinHeeler?logo=git)](https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler/commits/main)
+[![Publish Status](https://img.shields.io/github/actions/workflow/status/dreamwraith/Valheim-ConsoleStdinHeeler/publish.yml?label=Publish%20Portals&logo=githubactions)](https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler/actions)
+[![Thunderstore](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fthunderstore.io%2Fapi%2Fexperimental%2Fpackage%2FDreamWraith%2FConsoleStdinHeeler%2F&query=%24.latest.version_number&label=Thunderstore&logo=thunderstore&color=2980b9)](https://thunderstore.io/c/valheim/p/DreamWraith/ConsoleStdinHeeler/)
+[![Hexium](https://img.shields.io/badge/Hexium-ConsoleStdinHeeler-6c5ce7)](https://valheim.hexium.gg/mods/DreamWraith/ConsoleStdinHeeler)
+[![Game: Valheim](https://img.shields.io/badge/Valheim-Deep_North_%2F_1.x-1b2838?logo=steam&logoColor=white)](https://store.steampowered.com/app/892970/Valheim/)
+[![BepInEx Pack](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fthunderstore.io%2Fapi%2Fexperimental%2Fpackage%2Fdenikson%2FBepInExPack_Valheim%2F&query=%24.latest.version_number&label=BepInEx&color=5B57E7)](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim/)
+[![Target: .NET 4.8](https://img.shields.io/badge/.NET%20Framework-4.8-512BD4?logo=dotnet)](ConsoleStdinHeeler.csproj)
+[![Dedicated Server Only](https://img.shields.io/badge/Type-Dedicated%20Server-orange)](README.md#the-solution)
+[![License](https://img.shields.io/github/license/dreamwraith/Valheim-ConsoleStdinHeeler?color=blue)](LICENSE.md)
+[![AI Philosophy](https://img.shields.io/badge/AI%20Philosophy-Software%20Craft-2ea44f?logo=github)](https://gist.github.com/dreamwraith/77c91d656c842611bf8c40febf8056f2)
+
 Non-blocking STDIN console input and native server management commands for Valheim dedicated servers.
 
 > [!NOTE]
@@ -204,6 +217,7 @@ For detailed documentation on flags, workflows, and secret configuration, see [`
 
 ---
 
-## License
-
-This project is licensed under the GNU General Public License v3.0 - see the [LICENSE.md](LICENSE.md) file for details. Source code and issue tracking are available at [https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler](https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler).
+## License, Author Notes
+- This project is licensed under the GNU General Public License v3.0 - see the [LICENSE.md](LICENSE.md) file for details. Source code and issue tracking are available at [https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler](https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler).
+- [**A Small Note from Me about Valheim Modding Specifically**](https://gist.github.com/dreamwraith/98564f8441dc234bfadd7e2b605c694c) - Thoughts on open-source modding, community inclusivity, and anti-gatekeeping.
+- [**A Note on AI, Software Craft, and Why This Code Exists**](https://gist.github.com/dreamwraith/77c91d656c842611bf8c40febf8056f2) - Personal essay on software craft, human agency, and engineering responsibility.
