@@ -263,6 +263,32 @@ Please commit manifest.json before creating a release:
 
 Write-Host "   ✓ manifest.json is synchronized with v$cleanVersion and verified in release commit." -ForegroundColor Green
 
+# Verify that local release commit (HEAD) has been pushed to remote
+try {
+    $hasUpstream = git -C $ProjectDir rev-parse --abbrev-ref --symbolic-full-name "@{u}" 2>$null
+    if ($hasUpstream) {
+        $unpushed = @(git -C $ProjectDir log "@{u}..HEAD" --oneline 2>$null | Where-Object { $_.Trim() })
+        if ($unpushed.Count -gt 0) {
+            $unpushedLog = ($unpushed -join "`n   ")
+            if ($DryRun) {
+                Write-Host "   [DRY RUN] Would block release: local branch has $($unpushed.Count) unpushed commit(s) ahead of upstream '$hasUpstream'." -ForegroundColor Yellow
+            } else {
+                Write-Error @"
+Release blocked: Local branch has $($unpushed.Count) unpushed commit(s) ahead of upstream '$hasUpstream':
+   $unpushedLog
+
+GitHub Releases require your release commit to be pushed to remote first so the release tag is attached to the correct commit.
+Please push your branch before creating a release:
+   git push
+"@
+                exit 1
+            }
+        } else {
+            Write-Host "   ✓ Local branch is up-to-date with upstream remote ($hasUpstream)." -ForegroundColor Green
+        }
+    }
+} catch { }
+
 # Pre-flight check: ensure release tag doesn't already exist on GitHub
 try {
     $existingRelease = gh release view $tagName --json url -q .url 2>$null
@@ -354,12 +380,19 @@ $statusDesc = if ($isDraft) { "DRAFT" } else { "PUBLISHED (FULL)" }
 
 Write-Host "`n[Step 4/4] Creating GitHub Release ($statusDesc) for $tagName..." -ForegroundColor Cyan
 
+$headSha = (git -C $ProjectDir rev-parse HEAD 2>$null)
+if ($headSha) { $headSha = $headSha.Trim() }
+
 $ghArgs = @(
     "release", "create", $tagName,
     $modZip.FullName,
     "--title", $releaseTitle,
     "--notes-file", $notesPath
 )
+
+if ($headSha) {
+    $ghArgs += @("--target", $headSha)
+}
 
 if ($isDraft) {
     $ghArgs += "--draft"
