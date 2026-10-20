@@ -1,5 +1,3 @@
-using System.Reflection;
-
 namespace ConsoleStdinHeeler
 {
     /// <summary>
@@ -8,9 +6,5 @@ namespace ConsoleStdinHeeler
     /// </summary>
     public static partial class CommandOverrides
     {
-        private static readonly MethodInfo? SendNetTimeMethod = typeof(ZNet).GetMethod(
-            "SendNetTime",
-            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public
-        );
     }
 }

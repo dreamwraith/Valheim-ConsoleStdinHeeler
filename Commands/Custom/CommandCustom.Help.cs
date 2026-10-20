@@ -1,18 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace ConsoleStdinHeeler
 {
     public static partial class CommandCustom
     {
-        private static readonly FieldInfo? TerminalCommandsField = typeof(Terminal).GetField(
-            "commands",
-            BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public
-        );
-
-        private static bool _hasLoggedReflectionWarning;
-
         internal static readonly (string Syntax, string Description)[] DedicatedCommands =
         [
             ("save", "Force save world and player profile data"),
@@ -114,31 +106,7 @@ namespace ConsoleStdinHeeler
             Plugin.Log.LogInfo($"{TerminalColor.Gray}Tip: Type 'help all' to display the complete, unfiltered native command catalog.{TerminalColor.Reset}");
         }
 
-        private static Dictionary<string, Terminal.ConsoleCommand>? GetRegisteredTerminalCommands()
-        {
-            if (TerminalCommandsField != null)
-            {
-                try
-                {
-                    if (TerminalCommandsField.GetValue(null) is Dictionary<string, Terminal.ConsoleCommand> registeredCommands)
-                    {
-                        return registeredCommands;
-                    }
-                }
-                catch (Exception exception)
-                {
-                    Plugin.Log.LogDebug($"Could not read Terminal.commands dictionary: {exception.Message}");
-                }
-            }
-
-            if (!_hasLoggedReflectionWarning)
-            {
-                _hasLoggedReflectionWarning = true;
-                Plugin.Log.LogWarning("Could not reflect Terminal.commands dictionary. Mod command auto-discovery in 'help' will be disabled.");
-            }
-
-            return null;
-        }
+        private static Dictionary<string, Terminal.ConsoleCommand> GetRegisteredTerminalCommands() => Terminal.commands;
 
         private static string FormatCommandSyntax(string syntax, int padWidth = 28)
         {

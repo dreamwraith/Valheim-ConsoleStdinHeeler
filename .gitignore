@@ -12,6 +12,7 @@
 *.userosscache
 *.sln.docstates
 *.suo
+[Ee]nvironment.props
 
 ## OS generated files
 .DS_Store

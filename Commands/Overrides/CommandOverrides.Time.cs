@@ -72,7 +72,7 @@ namespace ConsoleStdinHeeler
         {
             try
             {
-                SendNetTimeMethod?.Invoke(ZNet.instance, null);
+                ZNet.instance.SendNetTime();
             }
             catch
             {

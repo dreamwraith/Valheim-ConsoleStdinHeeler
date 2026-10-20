@@ -123,7 +123,7 @@ namespace ConsoleStdinHeeler
 
         public static void ExecuteTerminalCommand(string commandLine)
         {
-            if (Console.instance == null)
+            if (!Console.instance)
             {
                 Plugin.Log.LogWarning("Valheim Console/Terminal instance is not available yet.");
                 return;
@@ -132,7 +132,7 @@ namespace ConsoleStdinHeeler
             bool previousCheatState = Terminal.m_cheat;
             try
             {
-                if (Plugin.EnableCheatsByDefault != null && Plugin.EnableCheatsByDefault.Value)
+                if (Plugin.EnableCheatsByDefault.Value)
                 {
                     Terminal.m_cheat = true;
                 }
@@ -152,7 +152,7 @@ namespace ConsoleStdinHeeler
         /// </summary>
         public static ZNetPeer? FindPeer(string playerIdentifier)
         {
-            if (string.IsNullOrWhiteSpace(playerIdentifier) || ZNet.instance == null)
+            if (string.IsNullOrWhiteSpace(playerIdentifier) || !ZNet.instance)
             {
                 return null;
             }
@@ -287,7 +287,7 @@ namespace ConsoleStdinHeeler
                 float.TryParse(tokens[0], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float x2) &&
                 float.TryParse(tokens[1], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float z2))
             {
-                float y = ZoneSystem.instance != null ? ZoneSystem.instance.GetSolidHeight(new Vector3(x2, 0f, z2)) + 0.5f : 30f;
+                float y = ZoneSystem.instance ? ZoneSystem.instance.GetSolidHeight(new Vector3(x2, 0f, z2)) + 0.5f : 30f;
                 coords = new Vector3(x2, y, z2);
                 return true;
             }

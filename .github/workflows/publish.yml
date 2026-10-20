@@ -23,9 +23,8 @@ jobs:
     runs-on: windows-latest
     env:
       THUNDERSTORE_TOKEN: ${{ secrets.THUNDERSTORE_TOKEN }}
-      HEXIUM_TOKEN: ${{ secrets.HEXIUM_TOKEN }}
       NEXUSMODS_API_KEY: ${{ secrets.NEXUSMODS_API_KEY || secrets.NEXUS_API_KEY }}
-      COMMUNITY_NAMESPACE: ${{ vars.COMMUNITY_NAMESPACE || secrets.COMMUNITY_NAMESPACE || secrets.THUNDERSTORE_NAMESPACE || secrets.HEXIUM_NAMESPACE }}
+      COMMUNITY_NAMESPACE: ${{ vars.COMMUNITY_NAMESPACE || secrets.COMMUNITY_NAMESPACE || secrets.THUNDERSTORE_NAMESPACE }}
       COMMUNITY: ${{ secrets.COMMUNITY || 'valheim' }}
 
     steps:
@@ -73,13 +72,6 @@ jobs:
         run: |
           $dryRunFlag = if ("${{ inputs.dry_run }}" -eq "true") { @("-DryRun") } else { @() }
           pwsh ./.scripts/modtools.ps1 thunderstore -PackagePath "${{ steps.download_asset.outputs.package_zip }}" @dryRunFlag
-
-      - name: Publish to Hexium
-        if: ${{ env.HEXIUM_TOKEN != '' }}
-        shell: pwsh
-        run: |
-          $dryRunFlag = if ("${{ inputs.dry_run }}" -eq "true") { @("-DryRun") } else { @() }
-          pwsh ./.scripts/modtools.ps1 hexium -PackagePath "${{ steps.download_asset.outputs.package_zip }}" @dryRunFlag
 
       - name: Publish to Nexus Mods
         if: ${{ env.NEXUSMODS_API_KEY != '' }}

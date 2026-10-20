@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Local developer environment override template.
+  Copy this file to 'Environment.props' and adjust the paths
+  to match your local game and BepInEx installation.
+
+  Note: 'Environment.props' is ignored by git and will not be committed.
+-->
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <!-- Path to your Valheim game installation directory -->
+    <VALHEIM_INSTALL Condition="!Exists('$(VALHEIM_INSTALL)')">C:\Program Files (x86)\Steam\steamapps\common\Valheim</VALHEIM_INSTALL>
+
+    <!-- Path to your BepInEx root directory (contains 'core', 'plugins', etc.) -->
+    <!-- Default / Standard: $(VALHEIM_INSTALL)\BepInEx -->
+    <!-- Gale profile: $(AppData)\com.kesomannen.gale\valheim\profiles\<ProfileName>\BepInEx -->
+    <!-- r2modman / Thunderstore: $(AppData)\r2modmanPlus-local\Valheim\profiles\<ProfileName>\BepInEx -->
+    <BEPINEX_PATH Condition="!Exists('$(BEPINEX_PATH)')">$(VALHEIM_INSTALL)\BepInEx</BEPINEX_PATH>
+  </PropertyGroup>
+</Project>

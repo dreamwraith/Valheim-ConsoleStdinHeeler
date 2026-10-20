@@ -1,26 +1,32 @@
 #requires -Version 7
 
 # 1. Resolve and Load DW.ValheimModTools module
-# Priority 1: Local development copy in ~/source/DW-ValheimModTools
-$localDev = Join-Path $env:USERPROFILE "source\DW-ValheimModTools\DW.ValheimModTools.psd1"
+# Priority 1: Explicit environment variable override
+$overridePath = $env:DW_VALHEIM_MODTOOLS_PATH ?? $env:MODTOOLS_PATH
+# Priority 2: Workspace sibling directory (e.g., ../../DW-ValheimModTools)
+$siblingDev = Join-Path $PSScriptRoot "..\..\DW-ValheimModTools\DW.ValheimModTools.psd1"
 
-if (Test-Path $localDev) {
-    Import-Module $localDev -Force
+if ($overridePath -and (Test-Path $overridePath)) {
+    Import-Module $overridePath -Force
+} elseif (Test-Path $siblingDev) {
+    Import-Module $siblingDev -Force
+} elseif (Get-Module -ListAvailable DW.ValheimModTools) {
+    # Priority 3: System-installed module in $env:PSModulePath
+    Import-Module DW.ValheimModTools -Force
 } else {
-    # Priority 2: System-installed module or cached GitHub clone
-    if (Get-Module -ListAvailable DW.ValheimModTools) {
-        Import-Module DW.ValheimModTools -Force
+    # Priority 4: Cross-platform user cache fallback
+    $cacheBase = if ($env:LOCALAPPDATA) { $env:LOCALAPPDATA }
+                 elseif ($env:XDG_CACHE_HOME) { $env:XDG_CACHE_HOME }
+                 else { Join-Path $HOME ".cache" }
+    $cacheDir = Join-Path $cacheBase "DW-ValheimModTools"
+    $cacheManifest = Join-Path $cacheDir "DW.ValheimModTools.psd1"
+    if (-not (Test-Path $cacheManifest)) {
+        Write-Host "DW.ValheimModTools not found locally. Cloning from GitHub..." -ForegroundColor Cyan
+        git clone --depth 1 https://github.com/DreamWraith/DW-ValheimModTools.git $cacheDir
     } else {
-        $cacheDir = Join-Path $env:LOCALAPPDATA "DW-ValheimModTools"
-        $cacheManifest = Join-Path $cacheDir "DW.ValheimModTools.psd1"
-        if (-not (Test-Path $cacheManifest)) {
-            Write-Host "DW.ValheimModTools not found locally. Cloning from GitHub..." -ForegroundColor Cyan
-            git clone --depth 1 https://github.com/DreamWraith/DW-ValheimModTools.git $cacheDir
-        } else {
-            try { git -C $cacheDir pull --quiet 2>$null } catch { }
-        }
-        Import-Module $cacheManifest -Force
+        try { git -C $cacheDir pull --quiet 2>$null } catch { }
     }
+    Import-Module $cacheManifest -Force
 }
 
 # 2. Parse Command and Sub-arguments
@@ -43,10 +49,9 @@ if (-not $Command -or $Command -in @("help", "-h", "--help", "/?")) {
     Write-Host "Commands:" -ForegroundColor Cyan
     Write-Host "  release       Build, package, sync secrets, and create GitHub Release"
     Write-Host "  package       Bump version, sync manifest, and build release archives"
-    Write-Host "  publish       Publish to portals (Thunderstore, Hexium, Nexus Mods)"
+    Write-Host "  publish       Publish to portals (Thunderstore, Nexus Mods)"
     Write-Host "  nexus         Publish directly to Nexus Mods"
     Write-Host "  thunderstore  Publish directly to Thunderstore"
-    Write-Host "  hexium        Publish directly to Hexium"
     Write-Host "`nExamples:" -ForegroundColor Cyan
     Write-Host "  pwsh ./.scripts/modtools.ps1 release"
     Write-Host "  pwsh ./.scripts/modtools.ps1 release -Bump Patch"
@@ -64,7 +69,6 @@ $cmdMap = @{
     "publish"      = "Publish-ModPackage"
     "nexus"        = "Publish-NexusPackage"
     "thunderstore" = "Publish-ThunderstorePackage"
-    "hexium"       = "Publish-HexiumPackage"
 }
 
 $targetCmd = $cmdMap[$Command.ToLower()]
