@@ -94,6 +94,13 @@ namespace ConsoleStdinHeeler
                 return;
             }
 
+            if (!IsDedicatedServerEnvironment())
+            {
+                Log.LogWarning($"{ModName} is designed strictly for dedicated servers and cannot run on an interactive game client. Disabling mod.");
+                enabled = false;
+                return;
+            }
+
             try
             {
                 _harmony = new Harmony(ModGUID);
@@ -104,15 +111,7 @@ namespace ConsoleStdinHeeler
                 Log.LogWarning($"Failed to initialize Harmony patches: {ex.Message}");
             }
 
-            // Primary detection at startup: check for headless graphics or server executable flags
-            if (IsDedicatedServerEnvironment())
-            {
-                StartStdinListener();
-            }
-            else
-            {
-                Log.LogInfo("Dedicated server environment not detected at Awake; listener deferred until networking initializes.");
-            }
+            StartStdinListener();
         }
 
         private void Update()

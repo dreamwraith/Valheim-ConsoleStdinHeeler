@@ -5,6 +5,11 @@ All notable changes to **ConsoleStdinHeeler** will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-10-23
+
+### Fixed
+- Added startup environment verification to disable the mod immediately with a warning when launched on an interactive game client... because I am an idiot who was confused by my own choice to install on a client.
+
 ## [1.2.0] - 2026-10-19
 
 ### Changed
