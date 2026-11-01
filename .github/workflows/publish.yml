@@ -79,4 +79,3 @@ jobs:
         run: |
           $dryRunFlag = if ("${{ inputs.dry_run }}" -eq "true") { @("-DryRun") } else { @() }
           pwsh ./.scripts/modtools.ps1 nexus -PackagePath "${{ steps.download_asset.outputs.package_zip }}" @dryRunFlag
-

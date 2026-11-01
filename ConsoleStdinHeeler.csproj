@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <TargetFramework>net48</TargetFramework>
     <OutputType>Library</OutputType>
     <AssemblyName>ConsoleStdinHeeler</AssemblyName>
@@ -7,22 +8,19 @@
     <LangVersion>12.0</LangVersion>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Version>1.2.1</Version>
-    <AssemblyVersion>$(Version)</AssemblyVersion>
-    <FileVersion>$(Version)</FileVersion>
-    <InformationalVersion>$(Version)</InformationalVersion>
     <PackageWebsiteUrl>https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler</PackageWebsiteUrl>
     <PackageDescription>Non-blocking STDIN console input and native server management commands for Valheim dedicated servers.</PackageDescription>
     <Authors>dreamwraith</Authors>
-    <Company>https://github.com/dreamwraith</Company>
-    <Description>Non-blocking STDIN console input and native server management commands for Valheim dedicated servers.</Description>
+    <Company>dreamwraith (https://github.com/dreamwraith)</Company>
+    <Copyright>Copyright (c) 2026 dreamwraith</Copyright>
+    <Description>$(PackageDescription)</Description>
     <PackageProjectUrl>https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler</PackageProjectUrl>
     <RepositoryUrl>https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler</RepositoryUrl>
-    <!-- Nexus Mods Identifiers -->
     <NexusModId>4329</NexusModId>
     <NexusFileId></NexusFileId>
   </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
@@ -32,6 +30,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
@@ -41,9 +40,15 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="src/**/*.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="JotunnLib" Version="2.30.2" PrivateAssets="all" ExcludeAssets="runtime" />
   </ItemGroup>
+
   <!-- Generate VersionInfo.g.cs from $(Version) so Plugin.ModVersion is always in sync -->
   <Target Name="GenerateVersionInfo" BeforeTargets="BeforeCompile;CoreCompile">
     <PropertyGroup>
@@ -66,21 +71,49 @@
       <FileWrites Include="$(VersionInfoFile)" />
     </ItemGroup>
   </Target>
-  <!-- Keep manifest.json automatically synchronized with $(Version) and package properties -->
+
+  <UsingTask TaskName="SyncManifestJson" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <ManifestPath ParameterType="System.String" Required="true" />
+      <ModName ParameterType="System.String" Required="true" />
+      <ModVersion ParameterType="System.String" Required="true" />
+      <WebsiteUrl ParameterType="System.String" Required="true" />
+      <ModDescription ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System" />
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Text" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+        string content =
+            "{\n" +
+            "  \"name\": \"" + ModName + "\",\n" +
+            "  \"version_number\": \"" + ModVersion + "\",\n" +
+            "  \"website_url\": \"" + WebsiteUrl + "\",\n" +
+            "  \"description\": \"" + ModDescription + "\",\n" +
+            "  \"dependencies\": [\n" +
+            "    \"denikson-BepInExPack_Valheim-5.4.2360\"\n" +
+            "  ]\n" +
+            "}\n";
+        string existing = File.Exists(ManifestPath) ? File.ReadAllText(ManifestPath, Encoding.UTF8) : null;
+        if (!string.Equals(existing, content, StringComparison.Ordinal))
+        {
+            File.WriteAllText(ManifestPath, content, new UTF8Encoding(false));
+        }
+      ]]></Code>
+    </Task>
+  </UsingTask>
+
+  <!-- Keep manifest.json automatically synchronized with $(Version) and package properties using Unix LF endings -->
   <Target Name="GenerateManifest" BeforeTargets="BeforeBuild;PackageMod">
-    <ItemGroup>
-      <ManifestLines Include="{" />
-      <ManifestLines Include="%20%20&quot;name&quot;: &quot;$(AssemblyName)&quot;," />
-      <ManifestLines Include="%20%20&quot;version_number&quot;: &quot;$(Version)&quot;," />
-      <ManifestLines Include="%20%20&quot;website_url&quot;: &quot;$(PackageWebsiteUrl)&quot;," />
-      <ManifestLines Include="%20%20&quot;description&quot;: &quot;$(PackageDescription)&quot;," />
-      <ManifestLines Include="%20%20&quot;dependencies&quot;: [" />
-      <ManifestLines Include="%20%20%20%20&quot;denikson-BepInExPack_Valheim-5.4.2350&quot;" />
-      <ManifestLines Include="%20%20]" />
-      <ManifestLines Include="}" />
-    </ItemGroup>
-    <WriteLinesToFile File="$(ProjectDir)manifest.json" Lines="@(ManifestLines)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <SyncManifestJson
+      ManifestPath="$(ProjectDir)manifest.json"
+      ModName="$(AssemblyName)"
+      ModVersion="$(Version)"
+      WebsiteUrl="$(PackageWebsiteUrl)"
+      ModDescription="$(PackageDescription)" />
   </Target>
+
   <!-- Create Thunderstore / Nexus Mods distribution package on Release build -->
   <Target Name="PackageMod" AfterTargets="Build" Condition="'$(Configuration)' == 'Release' and '$(SkipPackageMod)' != 'true'" DependsOnTargets="GenerateManifest">
     <PropertyGroup>
@@ -94,6 +127,8 @@
     <Copy SourceFiles="$(ProjectDir)icon.png" DestinationFolder="$(PackageStagingDir)" Condition="Exists('$(ProjectDir)icon.png')" />
     <Copy SourceFiles="$(ProjectDir)README.md" DestinationFolder="$(PackageStagingDir)" Condition="Exists('$(ProjectDir)README.md')" />
     <Copy SourceFiles="$(ProjectDir)CHANGELOG.md" DestinationFolder="$(PackageStagingDir)" Condition="Exists('$(ProjectDir)CHANGELOG.md')" />
+    <Copy SourceFiles="$(ProjectDir)CONTRIBUTING.md" DestinationFolder="$(PackageStagingDir)" Condition="Exists('$(ProjectDir)CONTRIBUTING.md')" />
+    <Copy SourceFiles="$(ProjectDir)LICENSE.md" DestinationFolder="$(PackageStagingDir)" Condition="Exists('$(ProjectDir)LICENSE.md')" />
     <ZipDirectory SourceDirectory="$(PackageStagingDir)" DestinationFile="$(PackageZipFile)" Overwrite="true" />
     <RemoveDir Directories="$(PackageStagingDir)" />
     <Message Importance="High" Text="[PackageMod] Successfully generated mod release package: $(PackageZipFile)" />

@@ -4,6 +4,6 @@
   "website_url": "https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler",
   "description": "Non-blocking STDIN console input and native server management commands for Valheim dedicated servers.",
   "dependencies": [
-    "denikson-BepInExPack_Valheim-5.4.2350"
+    "denikson-BepInExPack_Valheim-5.4.2360"
   ]
 }
