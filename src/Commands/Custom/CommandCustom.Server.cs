@@ -167,7 +167,7 @@ namespace ConsoleStdinHeeler
         private static void ExecuteImmediateShutdown()
         {
             Plugin.Log.LogInfo("Initiating graceful server shutdown via Application.Quit()...");
-            Plugin.Instance?.StopListener();
+            StdinListener.Stop();
 
             // Trigger Valheim's native shutdown pipeline (identical to SIGINT / graceful stop / server_exit.drp).
             // Game.OnApplicationQuit() synchronously executes SaveWorld(true), disconnects peers, and flushes OS buffers.
