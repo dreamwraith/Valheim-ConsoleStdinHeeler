@@ -11,7 +11,10 @@ namespace ConsoleStdinHeeler
     /// </summary>
     public static class TerminalUtils
     {
-        private static readonly Regex TagRegex = new(@"<([^>]+)>", RegexOptions.Compiled);
+        // known rich text tags only, so usage text like <name> survives
+        private static readonly Regex TagRegex = new(
+            @"<(/?(?:color|b|i|size|material|quad|sprite)(?:[=\s][^>]*)?)>",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Processes input text according to the specified ColorTagMode.

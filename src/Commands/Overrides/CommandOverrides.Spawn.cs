@@ -64,7 +64,7 @@ namespace ConsoleStdinHeeler
             {
                 if (!int.TryParse(parts[3], out int parsedLevel) || parsedLevel < 1)
                 {
-                    Plugin.Log.LogWarning($"Invalid stars/rank '{parts[3]}'. Level must be a positive integer.");
+                    Plugin.Log.LogWarning($"Invalid level '{parts[3]}'. Level must be a positive integer.");
                     return;
                 }
 

@@ -105,10 +105,10 @@ namespace ConsoleStdinHeeler
                 string networkEndpoint = peer.m_socket?.GetHostName() ?? "unknown";
                 string playerName = string.IsNullOrEmpty(peer.m_playerName) ? "<connecting>" : peer.m_playerName;
                 float pingSeconds = peer.m_rpc != null ? peer.m_rpc.GetTimeSinceLastPing() : -1f;
-                string pingColor = pingSeconds < 0 ? TerminalColor.Gray : (pingSeconds < 0.1f ? TerminalColor.Green : (pingSeconds < 0.2f ? TerminalColor.Yellow : TerminalColor.Red));
-                string pingDisplay = pingSeconds >= 0 ? $"{pingSeconds * 1000f:F0}ms" : "n/a";
+                string pingColor = pingSeconds < 0 ? TerminalColor.Gray : (pingSeconds < 2f ? TerminalColor.Green : (pingSeconds < 5f ? TerminalColor.Yellow : TerminalColor.Red));
+                string pingDisplay = pingSeconds >= 0 ? $"{pingSeconds * 1000f:F0}ms ago" : "n/a";
 
-                Plugin.Log.LogInfo($"  [{playerNumber}] {TerminalColor.Cyan}{playerName}{TerminalColor.Reset} | Ping: {pingColor}{pingDisplay}{TerminalColor.Reset} | Endpoint: {TerminalColor.Gray}{networkEndpoint}{TerminalColor.Reset} | ID: {TerminalColor.Gray}{peer.m_characterID}{TerminalColor.Reset}");
+                Plugin.Log.LogInfo($"  [{playerNumber}] {TerminalColor.Cyan}{playerName}{TerminalColor.Reset} | Last ping: {pingColor}{pingDisplay}{TerminalColor.Reset} | Endpoint: {TerminalColor.Gray}{networkEndpoint}{TerminalColor.Reset} | ID: {TerminalColor.Gray}{peer.m_characterID}{TerminalColor.Reset}");
                 playerNumber++;
             }
         }
