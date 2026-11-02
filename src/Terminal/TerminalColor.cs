@@ -1,13 +1,15 @@
+using ConsoleStdinHeeler.Configuration;
+
 namespace ConsoleStdinHeeler
 {
     /// <summary>
     /// Terminal ANSI escape sequences for text coloring and formatting in console logs.
     /// Supports standard 16-color ANSI formatting, Unity RichText color aliases, and 24-bit TrueColor RGB.
-    /// Automatically respects the user's Plugin.ColorFormatting configuration setting.
+    /// Automatically respects the user's ModConfig.ColorFormatting configuration setting.
     /// </summary>
     public static class TerminalColor
     {
-        private static bool Enabled => Plugin.ColorFormatting == null || Plugin.ColorFormatting.Value == Plugin.ColorTagMode.Ansi;
+        private static bool Enabled => ModConfig.ColorFormatting == null || ModConfig.ColorFormatting.Value == ColorTagMode.Ansi;
 
         // Control sequences
         public static string Reset => Enabled ? "\u001b[0m" : string.Empty;

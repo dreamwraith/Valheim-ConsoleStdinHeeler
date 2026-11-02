@@ -11,9 +11,9 @@
     <Version>1.2.1</Version>
     <PackageWebsiteUrl>https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler</PackageWebsiteUrl>
     <PackageDescription>Non-blocking STDIN console input and native server management commands for Valheim dedicated servers.</PackageDescription>
-    <Authors>dreamwraith</Authors>
-    <Company>dreamwraith (https://github.com/dreamwraith)</Company>
-    <Copyright>Copyright (c) 2026 dreamwraith</Copyright>
+    <Authors>DreamWraith</Authors>
+    <Company>DreamWraith (https://github.com/dreamwraith)</Company>
+    <Copyright>Copyright (c) 2026 DreamWraith</Copyright>
     <Description>$(PackageDescription)</Description>
     <PackageProjectUrl>https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler</PackageProjectUrl>
     <RepositoryUrl>https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler</RepositoryUrl>

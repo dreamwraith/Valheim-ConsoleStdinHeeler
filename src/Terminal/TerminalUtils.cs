@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using ConsoleStdinHeeler.Configuration;
 
 namespace ConsoleStdinHeeler
 {
@@ -15,11 +16,11 @@ namespace ConsoleStdinHeeler
         /// <summary>
         /// Processes input text according to the specified ColorTagMode.
         /// </summary>
-        public static string ProcessText(string text, Plugin.ColorTagMode mode) =>
+        public static string ProcessText(string text, ColorTagMode mode) =>
             string.IsNullOrEmpty(text) ? text : mode switch
             {
-                Plugin.ColorTagMode.Strip => StripRichTextTags(text),
-                Plugin.ColorTagMode.Ansi => ConvertRichTextToAnsi(text),
+                ColorTagMode.Strip => StripRichTextTags(text),
+                ColorTagMode.Ansi => ConvertRichTextToAnsi(text),
                 _ => text,
             };
 

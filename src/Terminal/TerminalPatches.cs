@@ -1,4 +1,5 @@
 using System;
+using ConsoleStdinHeeler.Configuration;
 using HarmonyLib;
 
 namespace ConsoleStdinHeeler
@@ -16,12 +17,12 @@ namespace ConsoleStdinHeeler
         [HarmonyPrefix]
         private static void AddStringPrefix(ref string text)
         {
-            if (string.IsNullOrEmpty(text) || Plugin.ColorFormatting == null)
+            if (string.IsNullOrEmpty(text) || ModConfig.ColorFormatting == null)
             {
                 return;
             }
 
-            text = TerminalUtils.ProcessText(text, Plugin.ColorFormatting.Value);
+            text = TerminalUtils.ProcessText(text, ModConfig.ColorFormatting.Value);
         }
     }
 }

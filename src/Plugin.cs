@@ -2,8 +2,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using BepInEx;
-using BepInEx.Configuration;
 using BepInEx.Logging;
+using ConsoleStdinHeeler.Configuration;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -20,21 +20,6 @@ namespace ConsoleStdinHeeler
         internal static Plugin? Instance { get; private set; }
         internal static PluginLogger Log { get; private set; } = null!;
 
-
-        public enum ColorTagMode
-        {
-            Ansi,
-            Strip,
-            Raw
-        }
-
-        // Configuration entries
-        public static ConfigEntry<bool> EnableMod = null!;
-        public static ConfigEntry<bool> EnableCheatsByDefault = null!;
-        public static ConfigEntry<ColorTagMode> ColorFormatting = null!;
-        public static ConfigEntry<string> ConsolePrompt = null!;
-        public static ConfigEntry<bool> EnableDebugLogs = null!;
-
         private Harmony? _harmony;
         private const int MaxConsecutiveEofRetries = 3;
         private const int EofRetryIntervalMs = 1000;
@@ -50,45 +35,9 @@ namespace ConsoleStdinHeeler
             Instance = this;
             Log = new PluginLogger(Logger);
 
-            EnableMod = Config.Bind(
-                "1 - General",
-                "EnableMod",
-                true,
-                new ConfigDescription("Master switch to enable or disable the STDIN console listener.")
-            );
+            ModConfig.Initialize(Config);
 
-            EnableCheatsByDefault = Config.Bind(
-                "1 - General",
-                "EnableCheatsByDefault",
-                true,
-                new ConfigDescription("Allows modded and admin cheat commands to execute on the dedicated server.")
-            );
-
-            ConsolePrompt = Config.Bind(
-                "2 - Display",
-                "ConsolePrompt",
-                "> ",
-                new ConfigDescription("Prefix displayed in logs when an STDIN command is received.")
-            );
-
-            ColorFormatting = Config.Bind(
-                "2 - Display",
-                "ColorFormatting",
-                ColorTagMode.Ansi,
-                new ConfigDescription("How Unity rich-text color tags from console outputs are handled: Ansi (render in terminal colors), Strip (clean plain text), or Raw (keep tags unchanged).")
-            );
-
-            EnableDebugLogs = Config.Bind(
-                "9 - Debug",
-                "EnableDebugLogs",
-                false,
-                new ConfigDescription(
-                    "Enables verbose diagnostic logging.",
-                    null,
-                    new ConfigurationManagerAttributes { IsAdvanced = true })
-            );
-
-            if (!EnableMod.Value)
+            if (!ModConfig.EnableMod.Value)
             {
                 Log.LogInfo($"{ModName} is disabled in config.");
                 return;
@@ -249,16 +198,4 @@ namespace ConsoleStdinHeeler
             return isHeadlessGraphics || hasServerBinary || hasBatchModeFlag;
         }
     }
-
-    /// <summary>
-    /// ConfigurationManager integration attribute definition.
-    /// </summary>
-    internal class ConfigurationManagerAttributes
-    {
-        public bool? IsAdvanced { get; set; }
-        public int? Order { get; set; }
-        public bool? Browsable { get; set; }
-        public Action<ConfigEntryBase>? CustomDrawer { get; set; }
-    }
 }
-

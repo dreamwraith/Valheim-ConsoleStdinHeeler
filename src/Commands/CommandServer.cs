@@ -1,5 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
+using ConsoleStdinHeeler.Configuration;
 using UnityEngine;
 
 namespace ConsoleStdinHeeler
@@ -25,7 +26,7 @@ namespace ConsoleStdinHeeler
 
             try
             {
-                string prompt = Plugin.ConsolePrompt?.Value ?? "> ";
+                string prompt = ModConfig.ConsolePrompt?.Value ?? "> ";
                 Plugin.Log.LogInfo($"{TerminalColor.Gray}{prompt}{TerminalColor.Cyan}{rawCommandLine}{TerminalColor.Reset}");
 
                 // Cleanly split into command name and trailing arguments
@@ -132,7 +133,7 @@ namespace ConsoleStdinHeeler
             bool previousCheatState = Terminal.m_cheat;
             try
             {
-                if (Plugin.EnableCheatsByDefault.Value)
+                if (ModConfig.EnableCheatsByDefault.Value)
                 {
                     Terminal.m_cheat = true;
                 }

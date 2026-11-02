@@ -22,7 +22,7 @@ if ($overridePath -and (Test-Path $overridePath)) {
     $cacheManifest = Join-Path $cacheDir "DW.ValheimModTools.psd1"
     if (-not (Test-Path $cacheManifest)) {
         Write-Host "DW.ValheimModTools not found locally. Cloning from GitHub..." -ForegroundColor Cyan
-        git clone --depth 1 https://github.com/DreamWraith/DW-ValheimModTools.git $cacheDir
+        git clone --depth 1 https://github.com/dreamwraith/DW-ValheimModTools.git $cacheDir
     } else {
         try { git -C $cacheDir pull --quiet 2>$null } catch { }
     }
@@ -48,7 +48,7 @@ if (-not $Command -or $Command -in @("help", "-h", "--help", "/?")) {
     Write-Host "`nUsage: pwsh ./.scripts/modtools.ps1 <command> [parameters...]`n" -ForegroundColor Yellow
     Write-Host "Commands:" -ForegroundColor Cyan
     Write-Host "  release       Build, package, sync secrets, and create GitHub Release"
-    Write-Host "  package       Bump version, sync manifest, and build release archives"
+    Write-Host "  package       Bump version, sync manifest, build, and create the release archive"
     Write-Host "  publish       Publish to portals (Thunderstore, Nexus Mods)"
     Write-Host "  nexus         Publish directly to Nexus Mods"
     Write-Host "  thunderstore  Publish directly to Thunderstore"

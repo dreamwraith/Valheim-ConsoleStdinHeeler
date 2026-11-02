@@ -1,5 +1,6 @@
 using System;
 using BepInEx.Logging;
+using ConsoleStdinHeeler.Configuration;
 
 namespace ConsoleStdinHeeler
 {
@@ -43,7 +44,7 @@ namespace ConsoleStdinHeeler
 
         public void LogDebug(object data)
         {
-            if (Plugin.EnableDebugLogs?.Value == true)
+            if (ModConfig.EnableDebugLogs?.Value == true)
             {
                 _underlying.LogInfo($"[DEBUG] {data}");
             }
