@@ -5,6 +5,19 @@ All notable changes to **ConsoleStdinHeeler** will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-11-01
+
+### Fixed
+- The STDIN listener no longer boots up when `EnableMod` is off.
+- Usage text like `<name>` no longer gets eaten as a color tag.
+- The `players` ping column is "Last ping" now and shows how long ago it came in, colored by how stale it is. It was never actually latency.
+- The spawn level error says "level" instead of "stars/rank".
+- Fixed wrong help text for `kick`, `ban`, `unban`, `timescale`, `ping`, and `info`, and added the missing `exit`, `quit`, `broadcast`, `alert`, and `teleport` aliases to help.
+
+### Changed
+- Bumped BepInExPack to 5.4.2360.
+- Build tooling and source layout now match the rest of my mods.
+
 ## [1.2.1] - 2026-10-23
 
 ### Fixed

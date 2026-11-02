@@ -8,7 +8,7 @@
     <LangVersion>12.0</LangVersion>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Version>1.2.1</Version>
+    <Version>1.3.0</Version>
     <PackageWebsiteUrl>https://github.com/dreamwraith/Valheim-ConsoleStdinHeeler</PackageWebsiteUrl>
     <PackageDescription>Non-blocking STDIN console input and native server management commands for Valheim dedicated servers.</PackageDescription>
     <Authors>DreamWraith</Authors>
