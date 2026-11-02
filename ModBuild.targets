@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Shared mod build steps. For now, this file is copy pasted for every mod. Mod-specific settings are all detailed in csproj.
+  There is probably a better way, but this solved issues i was having with my build pipeline.
+-->
+<Project>
+
+  <!-- Generate VersionInfo.g.cs from $(Version) so Plugin.ModVersion is always in sync -->
+  <Target Name="GenerateVersionInfo" BeforeTargets="BeforeCompile;CoreCompile">
+    <PropertyGroup>
+      <VersionInfoFile>$(IntermediateOutputPath)VersionInfo.g.cs</VersionInfoFile>
+    </PropertyGroup>
+    <ItemGroup>
+      <VersionInfoLines Include="// &lt;auto-generated /&gt;" />
+      <VersionInfoLines Include="namespace $(RootNamespace)" />
+      <VersionInfoLines Include="{" />
+      <VersionInfoLines Include="    internal static class VersionInfo" />
+      <VersionInfoLines Include="    {" />
+      <VersionInfoLines Include="        public const string Version = &quot;$(Version)&quot;%3B" />
+      <VersionInfoLines Include="    }" />
+      <VersionInfoLines Include="}" />
+    </ItemGroup>
+    <MakeDir Directories="$(IntermediateOutputPath)" />
+    <WriteLinesToFile File="$(VersionInfoFile)" Lines="@(VersionInfoLines)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <Compile Include="$(VersionInfoFile)" />
+      <FileWrites Include="$(VersionInfoFile)" />
+    </ItemGroup>
+  </Target>
+
+  <UsingTask TaskName="SyncManifestJson" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <ManifestPath ParameterType="System.String" Required="true" />
+      <ModName ParameterType="System.String" Required="true" />
+      <ModVersion ParameterType="System.String" Required="true" />
+      <WebsiteUrl ParameterType="System.String" />
+      <ModDescription ParameterType="System.String" Required="true" />
+      <Dependencies ParameterType="Microsoft.Build.Framework.ITaskItem[]" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System" />
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Text" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+        Func<string, string> escape = value =>
+            (value ?? string.Empty).Replace("\\", "\\\\").Replace("\"", "\\\"");
+
+        StringBuilder dependencyLines = new StringBuilder();
+        int dependencyCount = Dependencies == null ? 0 : Dependencies.Length;
+        for (int index = 0; index < dependencyCount; index++)
+        {
+            string separator = index < dependencyCount - 1 ? "," : string.Empty;
+            dependencyLines.Append("    \"" + escape(Dependencies[index].ItemSpec) + "\"" + separator + "\n");
+        }
+
+        string content =
+            "{\n" +
+            "  \"name\": \"" + escape(ModName) + "\",\n" +
+            "  \"version_number\": \"" + escape(ModVersion) + "\",\n" +
+            "  \"website_url\": \"" + escape(WebsiteUrl) + "\",\n" +
+            "  \"description\": \"" + escape(ModDescription) + "\",\n" +
+            "  \"dependencies\": [\n" +
+            dependencyLines +
+            "  ]\n" +
+            "}\n";
+        string existing = File.Exists(ManifestPath) ? File.ReadAllText(ManifestPath, Encoding.UTF8) : null;
+        if (!string.Equals(existing, content, StringComparison.Ordinal))
+        {
+            File.WriteAllText(ManifestPath, content, new UTF8Encoding(false));
+        }
+      ]]></Code>
+    </Task>
+  </UsingTask>
+
+  <!-- Keep manifest.json automatically synchronized with $(Version) and package properties using Unix LF endings -->
+  <Target Name="GenerateManifest" BeforeTargets="BeforeBuild;PackageMod">
+    <SyncManifestJson
+      ManifestPath="$(ProjectDir)manifest.json"
+      ModName="$(AssemblyName)"
+      ModVersion="$(Version)"
+      WebsiteUrl="$(PackageWebsiteUrl)"
+      ModDescription="$(PackageDescription)"
+      Dependencies="@(ThunderstoreDependency)" />
+  </Target>
+
+  <!-- Create Thunderstore / Nexus Mods distribution package on Release build -->
+  <Target Name="PackageMod" AfterTargets="Build" Condition="'$(Configuration)' == 'Release' and '$(SkipPackageMod)' != 'true'" DependsOnTargets="GenerateManifest">
+    <PropertyGroup>
+      <PackageStagingDir>$(ProjectDir)bin\PackageTemp</PackageStagingDir>
+      <PackagePublishDir>$(ProjectDir)bin\Publish</PackagePublishDir>
+      <PackageZipFile>$(PackagePublishDir)\$(AssemblyName)-$(Version).zip</PackageZipFile>
+    </PropertyGroup>
+    <MakeDir Directories="$(PackageStagingDir);$(PackagePublishDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PackageStagingDir)" />
+    <Copy SourceFiles="$(ProjectDir)manifest.json" DestinationFolder="$(PackageStagingDir)" Condition="Exists('$(ProjectDir)manifest.json')" />
+    <Copy SourceFiles="$(ProjectDir)icon.png" DestinationFolder="$(PackageStagingDir)" Condition="Exists('$(ProjectDir)icon.png')" />
+    <Copy SourceFiles="$(ProjectDir)README.md" DestinationFolder="$(PackageStagingDir)" Condition="Exists('$(ProjectDir)README.md')" />
+    <Copy SourceFiles="$(ProjectDir)CHANGELOG.md" DestinationFolder="$(PackageStagingDir)" Condition="Exists('$(ProjectDir)CHANGELOG.md')" />
+    <Copy SourceFiles="$(ProjectDir)CONTRIBUTING.md" DestinationFolder="$(PackageStagingDir)" Condition="Exists('$(ProjectDir)CONTRIBUTING.md')" />
+    <Copy SourceFiles="$(ProjectDir)LICENSE.md" DestinationFolder="$(PackageStagingDir)" Condition="Exists('$(ProjectDir)LICENSE.md')" />
+    <ZipDirectory SourceDirectory="$(PackageStagingDir)" DestinationFile="$(PackageZipFile)" Overwrite="true" />
+    <RemoveDir Directories="$(PackageStagingDir)" />
+    <Message Importance="High" Text="[PackageMod] Successfully generated mod release package: $(PackageZipFile)" />
+  </Target>
+
+</Project>

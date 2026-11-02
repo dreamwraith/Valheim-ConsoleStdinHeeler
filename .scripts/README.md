@@ -102,7 +102,7 @@ Version numbers are maintained in exactly one place: the `<Version>` tag in your
 When building or packaging:
 
 1. **In-Code Plugin Version**: The `GenerateVersionInfo` MSBuild target emits `obj/<Configuration>/net48/VersionInfo.g.cs` containing `VersionInfo.Version`. `Plugin.cs` references this directly.
-2. **Manifest Sync**: `manifest.json` is generated on every build from the current version and project metadata, so do not edit it by hand. Dependency versions are set in the `SyncManifestJson` task in the `.csproj`.
+2. **Manifest Sync**: `manifest.json` is generated on every build from the current version and project metadata, so do not edit it by hand. Dependency versions are set in the `ThunderstoreDependency` list in the `.csproj`. The shared build steps are in `ModBuild.targets`, which is identical in every mod repo.
 3. **Release Notes**: Notes matching the version section in `CHANGELOG.md` are extracted to `bin/Publish/release_notes.md`.
 
 ---
