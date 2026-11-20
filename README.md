@@ -67,7 +67,7 @@ Furthermore:
 - **Banner Notifications (`say`)**: Sends top-left notification banners to all players (`@all` or `*`) or a targeted player via `ZRoutedRpc`.
 - **Center Announcements (`announce` / `broadcast` / `alert`)**: Displays center-screen announcement banners to all players or a targeted player. Supports optional persistence duration via `-t <seconds>` (up to 60s) refreshed every second without fading, and cancellation (`announce cancel`).
 - **Teleportation (`tp` / `teleport`)**: Teleports a player to another player's position or to coordinates (`x,y,z`). Supports quoted names for player names containing spaces.
-- **Player Targeting & `@random`**: Supports `@random` as a player parameter (`tp`, `say`, `announce`, `spawn`, `event`) to select a connected player at random.
+- **Player Targeting & `@random`**: Supports `@random` as a player parameter (`tp`, `say`, `announce`, `spawn`, `event`, `findlocation`) to select a connected player at random.
 - **Prefab Spawning (`spawn`)**: Spawns prefabs near a player or coordinates with optional quantity, level (2 = 1 star, 3 = 2 stars), and silent flag (`-s`).
 - **Raid & Event Controls (`event`, `stopevent`, `randomevent`)**: Starts specific or random raids near players or coordinates, or halts active events.
 - **World Time Controls (`tod`, `skiptime`, `sleep`)**: Adjusts time of day (`0.0` to `1.0`), skips forward in seconds, or advances time to morning with client synchronization.
@@ -97,6 +97,7 @@ Furthermore:
 | `say` | `<@all/*\|player> <message>` | Displays a top-left notification banner to all clients or a targeted player. |
 | `announce` / `broadcast` / `alert` | `[-t sec] <@all/*\|player> <message>` / `cancel` / `abort` | Displays a center-screen announcement (optional `-t` persistence up to 60s, or `cancel`). |
 | `tp` / `teleport` | `<player> <target/x,y,z>` | Teleports a player to another player or coordinates. The player sees a "Teleported by administrator" message. |
+| `findlocation` / `findloc` | `<location> <player/coords/spawn>` | Prints the coordinates of the closest location with that name to a player, coordinates, or world spawn. Location names are case-sensitive. |
 | `spawn` | `<prefab> <player/coords> [amt] [lvl] [-s]` | Spawns prefabs near a player or coordinates with count, level (2 = 1 star, 3 = 2 stars), and optional silent mode (`-s`). Count goes up to 1000, level up to 10, item quality up to 4. |
 | `event` | `<name> <player/coords>` | Starts a raid/event near a player or coordinates. |
 | `stopevent` | *(none)* | Stops any currently active raid/event. |
@@ -135,7 +136,7 @@ Coordinates are `x,y,z` or `x,z` with no spaces. With `x,z`, height comes from t
 `players` and `say` replace the game commands of the same name.
 
 > [!TIP]
-> **Player Targeting & `@random`:** Any command accepting a player target (`tp`, `say`, `announce`, `spawn`, `event`) supports `@random` to select a connected player at random.
+> **Player Targeting & `@random`:** Any command accepting a player target (`tp`, `say`, `announce`, `spawn`, `event`, `findlocation`) supports `@random` to select a connected player at random.
 >
 > **Command Filter:** About 100 base game commands that are not usable or not safe on a dedicated server (e.g. `god`, `fly`, `goto`, `pos`, `beard`) are blocked by name with a warning. A mod command with the same name is blocked too.
 
@@ -226,6 +227,7 @@ You can also find and message DreamWraith on these Valheim Discord servers:
 
 - [**WispTorchHeeler**](https://thunderstore.io/c/valheim/p/DreamWraith/WispTorchHeeler/): Tiered Mistlands wisp torches and lamps with expanded mist clearance, torch painting, and Wisplight customization.
 - [**PersonalChestHeeler**](https://thunderstore.io/c/valheim/p/DreamWraith/PersonalChestHeeler/): Tiered personal locked storage chests with server-synced capacity and crafting recipes.
+- [**PlantBiomeHeeler**](https://thunderstore.io/c/valheim/p/DreamWraith/PlantBiomeHeeler/): Terrain overlay and HUD that show which biome a crop or sapling actually gets, with two-tone borders and optional hatch lines.
 
 ### HUD
 
