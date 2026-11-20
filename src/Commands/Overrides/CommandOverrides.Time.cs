@@ -11,27 +11,27 @@ namespace ConsoleStdinHeeler
         /// </summary>
         public static void HandleTodCommand(string arguments)
         {
-            if (ZNet.instance == null)
+            if (!ZNet.instance)
             {
                 Plugin.Log.LogWarning("Cannot set time of day: Server world is not loaded.");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(arguments) ||
-                !float.TryParse(arguments.Trim(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float param) ||
-                param < 0f || param > 1f)
+                !float.TryParse(arguments.Trim(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float parsedFraction) ||
+                parsedFraction < 0f || parsedFraction > 1f)
             {
                 Plugin.Log.LogWarning("Invalid parameters. Usage: tod <0-1> (e.g. tod 0.5 for noon)");
                 return;
             }
 
             double currentTime = ZNet.instance.GetTimeSeconds();
-            long dayLength = EnvMan.instance != null && EnvMan.instance.m_dayLengthSec > 0
+            long dayLength = EnvMan.instance && EnvMan.instance.m_dayLengthSec > 0
                 ? EnvMan.instance.m_dayLengthSec
                 : 1800L;
 
             long currentDay = (long)(currentTime / dayLength);
-            float targetFraction = Mathf.Clamp01(param);
+            float targetFraction = Mathf.Clamp01(parsedFraction);
 
             double newTime = (currentDay * dayLength) + (targetFraction * dayLength);
             if (newTime < currentTime)
@@ -39,7 +39,7 @@ namespace ConsoleStdinHeeler
                 newTime += dayLength;
             }
 
-            if (EnvMan.instance != null)
+            if (EnvMan.instance)
             {
                 EnvMan.instance.m_debugTimeOfDay = false;
             }
@@ -47,7 +47,7 @@ namespace ConsoleStdinHeeler
             ZNet.instance.SetNetTime(newTime);
             SynchronizeNetworkTime();
 
-            Plugin.Log.LogInfo($"Setting time of day: {TerminalColor.Cyan}{param:G}{TerminalColor.Reset}");
+            Plugin.Log.LogInfo($"Setting time of day: {TerminalColor.Cyan}{parsedFraction:G}{TerminalColor.Reset}");
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace ConsoleStdinHeeler
         /// </summary>
         public static void HandleSleepCommand()
         {
-            if (EnvMan.instance == null || ZNet.instance == null)
+            if (!EnvMan.instance || !ZNet.instance)
             {
                 Plugin.Log.LogWarning("Cannot skip time to morning: EnvMan/ZNet is not ready.");
                 return;

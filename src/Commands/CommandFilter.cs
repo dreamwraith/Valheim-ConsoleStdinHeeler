@@ -74,8 +74,8 @@ namespace ConsoleStdinHeeler
 
         private static HashSet<string> InitializeBuiltInCommands()
         {
-            var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "help", "broadcast", "alert", "teleport" };
-            foreach (var (syntax, _) in CommandCustom.DedicatedCommands)
+            HashSet<string> set = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "help", "broadcast", "alert", "teleport" };
+            foreach ((string syntax, _) in CommandCustom.DedicatedCommands)
             {
                 string commandPart = syntax.Split('[', '<')[0];
                 foreach (string token in commandPart.Split('/'))

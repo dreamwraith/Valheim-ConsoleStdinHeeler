@@ -107,7 +107,7 @@ namespace ConsoleStdinHeeler
             string durationText = duration > 1f ? $" ({duration:F0}s duration)" : string.Empty;
             Plugin.Log.LogInfo($"Sent center announcement banner to {targetDescription}{durationText}: {TerminalColor.Gold}\"{message}\"{TerminalColor.Reset}");
 
-            if (duration > 1f && Plugin.Instance != null)
+            if (duration > 1f && Plugin.Instance)
             {
                 _activeAnnouncementCoroutine = Plugin.Instance.StartCoroutine(PulseAnnouncementRoutine(targetUid, message, duration));
             }
@@ -117,7 +117,10 @@ namespace ConsoleStdinHeeler
         {
             if (_activeAnnouncementCoroutine != null)
             {
-                Plugin.Instance?.StopCoroutine(_activeAnnouncementCoroutine);
+                if (Plugin.Instance)
+                {
+                    Plugin.Instance.StopCoroutine(_activeAnnouncementCoroutine);
+                }
                 _activeAnnouncementCoroutine = null;
             }
         }
@@ -138,14 +141,14 @@ namespace ConsoleStdinHeeler
         private static IEnumerator PulseAnnouncementRoutine(long targetUid, string message, float duration)
         {
             float elapsed = 0f;
-            var waitPulse = new WaitForSeconds(AnnouncementPulseInterval);
+            WaitForSeconds waitPulse = new WaitForSeconds(AnnouncementPulseInterval);
 
             while (elapsed < duration)
             {
                 yield return waitPulse;
                 elapsed += AnnouncementPulseInterval;
 
-                if (ZRoutedRpc.instance == null || (targetUid != ZRoutedRpc.Everybody && ZNet.instance?.GetPeer(targetUid) == null))
+                if (ZRoutedRpc.instance == null || (targetUid != ZRoutedRpc.Everybody && (!ZNet.instance || ZNet.instance.GetPeer(targetUid) == null)))
                 {
                     yield break;
                 }

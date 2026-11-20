@@ -47,9 +47,9 @@ namespace ConsoleStdinHeeler
                 _harmony = new Harmony(ModGUID);
                 _harmony.PatchAll(typeof(Plugin).Assembly);
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                Log.LogWarning($"Failed to initialize Harmony patches: {ex.Message}");
+                Log.LogWarning($"Failed to initialize Harmony patches: {exception.Message}");
             }
 
             StdinListener.Start();
@@ -58,7 +58,7 @@ namespace ConsoleStdinHeeler
         private void Update()
         {
             // Announce when the server world has finished loading and is ready for commands
-            if (!_hasAnnouncedServerReady && Game.instance != null && ZoneSystem.instance != null)
+            if (!_hasAnnouncedServerReady && Game.instance && ZoneSystem.instance)
             {
                 _hasAnnouncedServerReady = true;
                 Log.LogInfo($"{TerminalColor.Bold}{TerminalColor.Green}Server world loaded successfully. STDIN console ready for commands.{TerminalColor.Reset}");

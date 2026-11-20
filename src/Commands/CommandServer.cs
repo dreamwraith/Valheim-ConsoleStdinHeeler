@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using ConsoleStdinHeeler.Configuration;
 using UnityEngine;
@@ -11,7 +12,7 @@ namespace ConsoleStdinHeeler
     /// </summary>
     public static class CommandServer
     {
-        private static readonly Regex CoordRegex =
+        private static readonly Regex CoordinateRegex =
             new(@"^-?\d+(?:\.\d+)?,-?\d+(?:\.\d+)?(?:,-?\d+(?:\.\d+)?)?$", RegexOptions.Compiled);
 
         /// <summary>
@@ -26,7 +27,7 @@ namespace ConsoleStdinHeeler
 
             try
             {
-                string prompt = ModConfig.ConsolePrompt?.Value ?? "> ";
+                string prompt = ModConfig.ConsolePrompt.Value;
                 Plugin.Log.LogInfo($"{TerminalColor.Gray}{prompt}{TerminalColor.Cyan}{rawCommandLine}{TerminalColor.Reset}");
 
                 // Cleanly split into command name and trailing arguments
@@ -73,6 +74,11 @@ namespace ConsoleStdinHeeler
                     case "players":
                     case "list":
                         CommandCustom.HandlePlayersCommand();
+                        return;
+
+                    case "findlocation":
+                    case "findloc":
+                        CommandCustom.HandleFindLocationCommand(commandArguments);
                         return;
 
                     case "say":
@@ -164,8 +170,8 @@ namespace ConsoleStdinHeeler
                 return null;
             }
 
-            var connectedPeers = ZNet.instance.GetConnectedPeers();
-            if (connectedPeers == null || connectedPeers.Count == 0)
+            List<ZNetPeer> connectedPeers = ZNet.instance.GetConnectedPeers();
+            if (connectedPeers.Count == 0)
             {
                 return null;
             }
@@ -173,52 +179,40 @@ namespace ConsoleStdinHeeler
             // Intercept '@random' player targeting: pick a random connected peer
             if (string.Equals(cleanId, "@random", StringComparison.OrdinalIgnoreCase))
             {
-                var validPeers = connectedPeers.FindAll(p => p != null);
-                if (validPeers.Count == 0)
-                {
-                    return null;
-                }
-
-                int randomIndex = UnityEngine.Random.Range(0, validPeers.Count);
-                return validPeers[randomIndex];
+                int randomIndex = UnityEngine.Random.Range(0, connectedPeers.Count);
+                return connectedPeers[randomIndex];
             }
 
-            return connectedPeers.Find(p =>
+            return connectedPeers.Find(peer =>
             {
-                if (p == null)
-                {
-                    return false;
-                }
-
                 // Match character name (exact match, case-insensitive)
-                if (string.Equals(p.m_playerName, cleanId, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(peer.m_playerName, cleanId, StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
 
                 // Match Steam ID (m_uid is Steam ID in dedicated server networking)
-                if (p.m_uid.ToString() == cleanId)
+                if (peer.m_uid.ToString() == cleanId)
                 {
                     return true;
                 }
 
                 // Match PlayFab ID if present
-                if (!string.IsNullOrEmpty(p.m_playfabId) && string.Equals(p.m_playfabId, cleanId, StringComparison.OrdinalIgnoreCase))
+                if (!string.IsNullOrEmpty(peer.m_playfabId) && string.Equals(peer.m_playfabId, cleanId, StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
 
                 // Match player ID or character user ID
-                if (p.m_playerID.ToString() == cleanId || p.m_characterID.UserID.ToString() == cleanId)
+                if (peer.m_playerID.ToString() == cleanId || peer.m_characterID.UserID.ToString() == cleanId)
                 {
                     return true;
                 }
 
                 // Match socket endpoint (e.g. "Steam_76561197970546107" or "192.168.1.5:1234")
-                string? hostName = p.m_socket?.GetHostName();
-                if (!string.IsNullOrEmpty(hostName) &&
-                    (string.Equals(hostName, cleanId, StringComparison.OrdinalIgnoreCase) ||
-                     string.Equals(hostName, "Steam_" + cleanId, StringComparison.OrdinalIgnoreCase)))
+                string hostName = peer.m_socket.GetHostName();
+                if (string.Equals(hostName, cleanId, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(hostName, "Steam_" + cleanId, StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
@@ -239,13 +233,13 @@ namespace ConsoleStdinHeeler
                 return false;
             }
 
-            if (ZNet.instance == null)
+            if (!ZNet.instance)
             {
                 Plugin.Log.LogWarning("Cannot find player: Server world is not loaded.");
                 return false;
             }
 
-            var connectedPeers = ZNet.instance.GetConnectedPeers();
+            List<ZNetPeer> connectedPeers = ZNet.instance.GetConnectedPeers();
             if (connectedPeers.Count == 0)
             {
                 Plugin.Log.LogWarning("Cannot find player: No players are currently connected to the server.");
@@ -266,10 +260,10 @@ namespace ConsoleStdinHeeler
         /// <summary>
         /// Attempts to parse a strict coordinate mask (0,0 or 0,0,0) without spaces.
         /// </summary>
-        public static bool TryParseCoordinates(string text, out Vector3 coords)
+        public static bool TryParseCoordinates(string text, out Vector3 coordinates)
         {
-            coords = Vector3.zero;
-            if (string.IsNullOrWhiteSpace(text) || !CoordRegex.IsMatch(text))
+            coordinates = Vector3.zero;
+            if (string.IsNullOrWhiteSpace(text) || !CoordinateRegex.IsMatch(text))
             {
                 return false;
             }
@@ -280,7 +274,7 @@ namespace ConsoleStdinHeeler
                 float.TryParse(tokens[1], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float y3) &&
                 float.TryParse(tokens[2], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float z3))
             {
-                coords = new Vector3(x3, y3, z3);
+                coordinates = new Vector3(x3, y3, z3);
                 return true;
             }
 
@@ -288,8 +282,8 @@ namespace ConsoleStdinHeeler
                 float.TryParse(tokens[0], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float x2) &&
                 float.TryParse(tokens[1], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float z2))
             {
-                float y = ZoneSystem.instance ? ZoneSystem.instance.GetSolidHeight(new Vector3(x2, 0f, z2)) + 0.5f : 30f;
-                coords = new Vector3(x2, y, z2);
+                float height = ZoneSystem.instance ? ZoneSystem.instance.GetSolidHeight(new Vector3(x2, 0f, z2)) + 0.5f : 30f;
+                coordinates = new Vector3(x2, height, z2);
                 return true;
             }
 
@@ -308,14 +302,14 @@ namespace ConsoleStdinHeeler
                 return false;
             }
 
-            if (TryParseCoordinates(targetToken, out Vector3 coords))
+            if (TryParseCoordinates(targetToken, out Vector3 coordinates))
             {
                 target = new CommandTarget(
-                    position: coords,
+                    position: coordinates,
                     forward: Vector3.forward,
                     peer: null,
                     player: null,
-                    description: $"coordinates ({coords.x:F1}, {coords.y:F1}, {coords.z:F1})",
+                    description: $"coordinates ({coordinates.x:F1}, {coordinates.y:F1}, {coordinates.z:F1})",
                     isCoordinates: true
                 );
                 return true;
@@ -326,38 +320,33 @@ namespace ConsoleStdinHeeler
                 return false;
             }
 
-            Player? player = null;
-            var allPlayers = Player.GetAllPlayers();
-            if (allPlayers != null)
-            {
-                player = allPlayers.Find(p => p != null &&
-                    (string.Equals(p.GetPlayerName(), peer.m_playerName, StringComparison.OrdinalIgnoreCase) ||
-                     p.GetPlayerID() == peer.m_playerID));
-            }
+            Player? player = Player.GetAllPlayers().Find(candidate => candidate &&
+                (string.Equals(candidate.GetPlayerName(), peer.m_playerName, StringComparison.OrdinalIgnoreCase) ||
+                 candidate.GetPlayerID() == peer.m_playerID));
 
-            Vector3 pos;
-            Vector3 fwd;
-            string desc;
+            Vector3 position;
+            Vector3 forward;
+            string description;
 
-            if (player != null)
+            if (player)
             {
-                pos = player.transform.position;
-                fwd = player.transform.forward;
-                desc = $"player '{TerminalColor.Cyan}{player.GetPlayerName()}{TerminalColor.Reset}' at {pos}";
+                position = player.transform.position;
+                forward = player.transform.forward;
+                description = $"player '{TerminalColor.Cyan}{player.GetPlayerName()}{TerminalColor.Reset}' at {position}";
             }
             else
             {
-                pos = peer.m_refPos;
-                fwd = Vector3.forward;
-                desc = $"player '{TerminalColor.Cyan}{peer.m_playerName}{TerminalColor.Reset}' at {pos}";
+                position = peer.m_refPos;
+                forward = Vector3.forward;
+                description = $"player '{TerminalColor.Cyan}{peer.m_playerName}{TerminalColor.Reset}' at {position}";
             }
 
             target = new CommandTarget(
-                position: pos,
-                forward: fwd,
+                position: position,
+                forward: forward,
                 peer: peer,
                 player: player,
-                description: desc,
+                description: description,
                 isCoordinates: false
             );
             return true;

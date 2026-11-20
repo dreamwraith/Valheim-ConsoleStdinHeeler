@@ -13,7 +13,7 @@ namespace ConsoleStdinHeeler
         /// </summary>
         public static void HandleSpawnCommand(string arguments)
         {
-            if (ZNetScene.instance == null || ZNet.instance == null)
+            if (!ZNetScene.instance || !ZNet.instance)
             {
                 Plugin.Log.LogWarning("Cannot spawn: ZNetScene or server world is not loaded.");
                 return;
@@ -35,7 +35,7 @@ namespace ConsoleStdinHeeler
                 parts.RemoveAt(parts.Count - 1);
             }
 
-            if (parts.Count < 2 || parts.Count > 4 || parts.Exists(p => p.Equals("-s", StringComparison.OrdinalIgnoreCase)))
+            if (parts.Count < 2 || parts.Count > 4 || parts.Exists(part => part.Equals("-s", StringComparison.OrdinalIgnoreCase)))
             {
                 Plugin.Log.LogWarning("Invalid parameters. Usage: spawn <prefab> <player|\"player name\"|coords> [count] [stars/rank] [-s]");
                 Plugin.Log.LogInfo("Coordinates must strictly follow 0,0 or 0,0,0 mask with no spaces.");
@@ -73,29 +73,26 @@ namespace ConsoleStdinHeeler
 
             // Look up prefab (exact match first, then single-pass case-insensitive and suggestion fallback)
             GameObject? prefab = ZNetScene.instance.GetPrefab(prefabName);
-            if (prefab == null)
+            if (!prefab)
             {
-                var allPrefabNames = ZNetScene.instance.GetPrefabNames();
-                var suggestions = new List<string>(8);
+                List<string> allPrefabNames = ZNetScene.instance.GetPrefabNames();
+                List<string> suggestions = new List<string>(8);
 
-                if (allPrefabNames != null)
+                foreach (string registeredName in allPrefabNames)
                 {
-                    foreach (string registeredName in allPrefabNames)
+                    if (string.Equals(registeredName, prefabName, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (string.Equals(registeredName, prefabName, StringComparison.OrdinalIgnoreCase))
-                        {
-                            prefab = ZNetScene.instance.GetPrefab(registeredName);
-                            break;
-                        }
+                        prefab = ZNetScene.instance.GetPrefab(registeredName);
+                        break;
+                    }
 
-                        if (suggestions.Count < 8 && registeredName.IndexOf(prefabName, StringComparison.OrdinalIgnoreCase) >= 0)
-                        {
-                            suggestions.Add(registeredName);
-                        }
+                    if (suggestions.Count < 8 && registeredName.IndexOf(prefabName, StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        suggestions.Add(registeredName);
                     }
                 }
 
-                if (prefab == null)
+                if (!prefab)
                 {
                     Plugin.Log.LogWarning($"Prefab '{prefabName}' not found in ZNetScene.");
                     if (suggestions.Count > 0)
@@ -116,7 +113,7 @@ namespace ConsoleStdinHeeler
             string locationDescription = target.Description;
 
             ItemDrop? itemDropTemplate = prefab.GetComponent<ItemDrop>();
-            int maxStackSize = itemDropTemplate != null && itemDropTemplate.m_itemData?.m_shared != null
+            int maxStackSize = itemDropTemplate && itemDropTemplate.m_itemData?.m_shared != null
                 ? Math.Max(1, itemDropTemplate.m_itemData.m_shared.m_maxStackSize)
                 : 1;
 
@@ -133,15 +130,15 @@ namespace ConsoleStdinHeeler
                     : UnityEngine.Random.insideUnitSphere * Mathf.Min(8f, 0.5f + totalEntitiesCreated * 0.3f);
                 spread.y = Mathf.Abs(spread.y) * 0.2f;
 
-                Vector3 spawnPos = target.IsCoordinates
+                Vector3 spawnPosition = target.IsCoordinates
                     ? spawnCenter + Vector3.up * 0.5f + spread
                     : spawnCenter + spawnForward * 2f + Vector3.up * 0.5f + spread;
-                GameObject spawnedObject = UnityEngine.Object.Instantiate(prefab, spawnPos, Quaternion.identity);
+                GameObject spawnedObject = UnityEngine.Object.Instantiate(prefab, spawnPosition, Quaternion.identity);
                 totalEntitiesCreated++;
 
                 // Configure ItemDrop
                 ItemDrop? spawnedItemDrop = spawnedObject.GetComponent<ItemDrop>();
-                if (spawnedItemDrop != null)
+                if (spawnedItemDrop)
                 {
                     ItemDrop.OnCreateNew(spawnedObject, true);
                     if (spawnedItemDrop.m_itemData != null)
@@ -157,14 +154,14 @@ namespace ConsoleStdinHeeler
 
                 // Configure Character level
                 Character? spawnedCharacter = spawnedObject.GetComponent<Character>();
-                if (spawnedCharacter != null && level > 1)
+                if (spawnedCharacter && level > 1)
                 {
                     spawnedCharacter.SetLevel(level);
                 }
 
                 // Mark cheated ZDO flag
                 ZNetView? netView = spawnedObject.GetComponent<ZNetView>();
-                if (netView != null && netView.IsValid())
+                if (netView && netView.IsValid())
                 {
                     netView.GetZDO().Set(ZDOVars.s_cheated, true);
                 }
@@ -173,7 +170,7 @@ namespace ConsoleStdinHeeler
             // Notify player if in range/scene, or via routed RPC if distant (unless silent mode is active)
             if (!isSilent)
             {
-                if (target.Player != null)
+                if (target.Player)
                 {
                     target.Player.Message(MessageHud.MessageType.TopLeft, $"Spawning object {prefab.name}" + (amount > 1 ? $" x{amount}" : ""));
                 }

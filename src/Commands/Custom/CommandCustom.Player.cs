@@ -16,7 +16,7 @@ namespace ConsoleStdinHeeler
         /// </summary>
         public static void HandleTeleportCommand(string arguments)
         {
-            if (ZNet.instance == null)
+            if (!ZNet.instance)
             {
                 Plugin.Log.LogWarning("Cannot teleport: Server world is not loaded.");
                 return;
@@ -42,8 +42,8 @@ namespace ConsoleStdinHeeler
                 return;
             }
 
-            string targetArg = parts[1];
-            if (!CommandServer.TryResolveTarget(targetArg, out CommandTarget target))
+            string targetToken = parts[1];
+            if (!CommandServer.TryResolveTarget(targetToken, out CommandTarget target))
             {
                 return;
             }
@@ -78,13 +78,13 @@ namespace ConsoleStdinHeeler
         /// </summary>
         public static void HandleKickAllCommand(string arguments)
         {
-            if (ZNet.instance == null)
+            if (!ZNet.instance)
             {
                 Plugin.Log.LogWarning("Cannot kick players: Server is not running.");
                 return;
             }
 
-            var connectedPeers = ZNet.instance.GetConnectedPeers();
+            List<ZNetPeer> connectedPeers = ZNet.instance.GetConnectedPeers();
             if (connectedPeers.Count == 0)
             {
                 Plugin.Log.LogInfo("No players are currently connected.");
@@ -125,7 +125,7 @@ namespace ConsoleStdinHeeler
             {
                 _kickDisconnectTime = -1f;
 
-                if (ZNet.instance == null)
+                if (!ZNet.instance)
                 {
                     return;
                 }
@@ -134,12 +134,12 @@ namespace ConsoleStdinHeeler
                 {
                     try
                     {
-                        peer.m_rpc?.Invoke("Kicked");
+                        peer.m_rpc.Invoke("Kicked");
                         ZNet.instance.Disconnect(peer);
                     }
-                    catch (Exception ex)
+                    catch (Exception exception)
                     {
-                        Plugin.Log.LogDebug($"Exception disconnecting peer {peer.m_playerName}: {ex.Message}");
+                        Plugin.Log.LogDebug($"Exception disconnecting peer {peer.m_playerName}: {exception.Message}");
                     }
                 }
 

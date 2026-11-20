@@ -20,6 +20,7 @@ namespace ConsoleStdinHeeler
             ("announce / broadcast / alert [-t sec] <@all/*|player> <msg>", "Display prominent center banner (optional -t duration up to 60s)"),
             ("announce cancel", "Cancel any active persistent announcement"),
             ("tp / teleport <player> <target/x,y,z>", "Teleport a player to another player or coordinates"),
+            ("findlocation / findloc <location> <target/x,y,z/spawn>", "Print coordinates of the closest location to a player, coordinates, or world spawn"),
             ("time", "Display current world time, day count, and sleep status"),
             ("tod <0-1>", "Set time of day for all connected clients (e.g. tod 0.5)"),
             ("skiptime [gameseconds]", "Skip ahead in seconds (default: 240)"),
@@ -63,18 +64,18 @@ namespace ConsoleStdinHeeler
             }
 
             Plugin.Log.LogInfo($"{TerminalColor.Bold}{TerminalColor.Orange}=== Dedicated Server Commands ==={TerminalColor.Reset}");
-            foreach (var (syntax, desc) in DedicatedCommands)
+            foreach ((string syntax, string description) in DedicatedCommands)
             {
-                Plugin.Log.LogInfo($"  {FormatCommandSyntax(syntax)}{TerminalColor.Gray}-{TerminalColor.Reset} {desc}");
+                Plugin.Log.LogInfo($"  {FormatCommandSyntax(syntax)}{TerminalColor.Gray}-{TerminalColor.Reset} {description}");
             }
 
             // Dynamic discovery of installed modded commands and non-client native commands
-            var registeredCommands = GetRegisteredTerminalCommands();
-            if (registeredCommands != null && registeredCommands.Count > 0)
+            Dictionary<string, Terminal.ConsoleCommand> registeredCommands = GetRegisteredTerminalCommands();
+            if (registeredCommands.Count > 0)
             {
-                var serverRelevantCommands = new List<KeyValuePair<string, Terminal.ConsoleCommand>>();
+                List<KeyValuePair<string, Terminal.ConsoleCommand>> serverRelevantCommands = new List<KeyValuePair<string, Terminal.ConsoleCommand>>();
 
-                foreach (var entry in registeredCommands)
+                foreach (KeyValuePair<string, Terminal.ConsoleCommand> entry in registeredCommands)
                 {
                     string registeredCommandName = entry.Key;
                     Terminal.ConsoleCommand commandInstance = entry.Value;
@@ -95,7 +96,7 @@ namespace ConsoleStdinHeeler
                     Plugin.Log.LogInfo($"{TerminalColor.Bold}{TerminalColor.Orange}=== Modded & Additional Available Commands ==={TerminalColor.Reset}");
                     serverRelevantCommands.Sort((first, second) => string.Compare(first.Key, second.Key, StringComparison.OrdinalIgnoreCase));
 
-                    foreach (var entry in serverRelevantCommands)
+                    foreach (KeyValuePair<string, Terminal.ConsoleCommand> entry in serverRelevantCommands)
                     {
                         string description = string.IsNullOrWhiteSpace(entry.Value.Description) ? "No description provided." : entry.Value.Description;
                         Plugin.Log.LogInfo($"  {FormatCommandSyntax(entry.Key)}{TerminalColor.Gray}-{TerminalColor.Reset} {description}");
@@ -118,11 +119,11 @@ namespace ConsoleStdinHeeler
             }
 
             string command = syntax.Substring(0, spaceIndex);
-            string args = syntax.Substring(spaceIndex);
-            string paddedArgs = syntax.Length < padWidth
-                ? args.PadRight(padWidth - command.Length)
-                : args + " ";
-            return $"{TerminalColor.Yellow}{command}{TerminalColor.Cyan}{paddedArgs}{TerminalColor.Reset}";
+            string arguments = syntax.Substring(spaceIndex);
+            string paddedArguments = syntax.Length < padWidth
+                ? arguments.PadRight(padWidth - command.Length)
+                : arguments + " ";
+            return $"{TerminalColor.Yellow}{command}{TerminalColor.Cyan}{paddedArguments}{TerminalColor.Reset}";
         }
     }
 }

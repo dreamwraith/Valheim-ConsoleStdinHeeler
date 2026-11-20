@@ -57,26 +57,26 @@ namespace ConsoleStdinHeeler
         /// <summary>
         /// Generates a 24-bit RGB ANSI true-color escape sequence.
         /// </summary>
-        public static string FromRgb(int r, int g, int b) =>
-            Enabled ? $"\u001b[38;2;{r};{g};{b}m" : string.Empty;
+        public static string FromRgb(int red, int green, int blue) =>
+            Enabled ? $"\u001b[38;2;{red};{green};{blue}m" : string.Empty;
 
         /// <summary>
         /// Resolves an ANSI escape sequence from a hex color string (e.g. "#FFA500" or "FFA500").
         /// </summary>
-        public static string? FromHex(string hex)
+        public static string? FromHex(string hexColor)
         {
-            if (!Enabled || string.IsNullOrWhiteSpace(hex))
+            if (!Enabled || string.IsNullOrWhiteSpace(hexColor))
             {
                 return string.Empty;
             }
 
-            hex = hex.TrimStart('#');
-            if (hex.Length == 6 &&
-                byte.TryParse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber, null, out byte r) &&
-                byte.TryParse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber, null, out byte g) &&
-                byte.TryParse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber, null, out byte b))
+            hexColor = hexColor.TrimStart('#');
+            if (hexColor.Length == 6 &&
+                byte.TryParse(hexColor.Substring(0, 2), System.Globalization.NumberStyles.HexNumber, null, out byte red) &&
+                byte.TryParse(hexColor.Substring(2, 2), System.Globalization.NumberStyles.HexNumber, null, out byte green) &&
+                byte.TryParse(hexColor.Substring(4, 2), System.Globalization.NumberStyles.HexNumber, null, out byte blue))
             {
-                return FromRgb(r, g, b);
+                return FromRgb(red, green, blue);
             }
 
             return null;
@@ -132,12 +132,12 @@ namespace ConsoleStdinHeeler
             };
         }
 
-        private static bool IsValidHex(string s)
+        private static bool IsValidHex(string text)
         {
-            for (int i = 0; i < s.Length; i++)
+            for (int index = 0; index < text.Length; index++)
             {
-                char c = s[i];
-                if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')))
+                char character = text[index];
+                if (!((character >= '0' && character <= '9') || (character >= 'a' && character <= 'f') || (character >= 'A' && character <= 'F')))
                 {
                     return false;
                 }

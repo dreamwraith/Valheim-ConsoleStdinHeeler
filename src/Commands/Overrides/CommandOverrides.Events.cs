@@ -12,7 +12,7 @@ namespace ConsoleStdinHeeler
         /// </summary>
         public static void HandleEventCommand(string arguments)
         {
-            if (RandEventSystem.instance == null || ZNet.instance == null)
+            if (!RandEventSystem.instance || !ZNet.instance)
             {
                 Plugin.Log.LogWarning("Cannot trigger event: RandEventSystem is not ready or world is still loading.");
                 return;
@@ -40,11 +40,11 @@ namespace ConsoleStdinHeeler
             RandomEvent? targetEvent = null;
             if (RandEventSystem.instance.m_events != null)
             {
-                foreach (RandomEvent ev in RandEventSystem.instance.m_events)
+                foreach (RandomEvent randomEvent in RandEventSystem.instance.m_events)
                 {
-                    if (ev != null && ev.m_enabled && string.Equals(ev.m_name, eventName, StringComparison.OrdinalIgnoreCase))
+                    if (randomEvent != null && randomEvent.m_enabled && string.Equals(randomEvent.m_name, eventName, StringComparison.OrdinalIgnoreCase))
                     {
-                        targetEvent = ev;
+                        targetEvent = randomEvent;
                         break;
                     }
                 }
@@ -57,8 +57,8 @@ namespace ConsoleStdinHeeler
                 return;
             }
 
-            string targetArg = parts[1];
-            if (!CommandServer.TryResolveTarget(targetArg, out CommandTarget target))
+            string targetToken = parts[1];
+            if (!CommandServer.TryResolveTarget(targetToken, out CommandTarget target))
             {
                 return;
             }
@@ -72,13 +72,13 @@ namespace ConsoleStdinHeeler
         /// </summary>
         public static void HandleStopEventCommand()
         {
-            if (RandEventSystem.instance == null)
+            if (!RandEventSystem.instance)
             {
                 Plugin.Log.LogWarning("Cannot stop event: RandEventSystem is not ready.");
                 return;
             }
 
-            var currentEvent = RandEventSystem.instance.GetCurrentRandomEvent();
+            RandomEvent? currentEvent = RandEventSystem.instance.GetCurrentRandomEvent();
             if (currentEvent == null)
             {
                 Plugin.Log.LogInfo("No random event/raid is currently active.");
@@ -92,17 +92,17 @@ namespace ConsoleStdinHeeler
 
         private static void ListAvailableEvents()
         {
-            if (RandEventSystem.instance == null || RandEventSystem.instance.m_events == null)
+            if (!RandEventSystem.instance || RandEventSystem.instance.m_events == null)
             {
                 return;
             }
 
-            var available = new List<string>();
-            foreach (var ev in RandEventSystem.instance.m_events)
+            List<string> available = new List<string>();
+            foreach (RandomEvent randomEvent in RandEventSystem.instance.m_events)
             {
-                if (ev != null && ev.m_enabled)
+                if (randomEvent != null && randomEvent.m_enabled)
                 {
-                    available.Add(ev.m_name);
+                    available.Add(randomEvent.m_name);
                 }
             }
             available.Sort(StringComparer.OrdinalIgnoreCase);

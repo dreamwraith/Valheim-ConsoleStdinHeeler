@@ -51,8 +51,8 @@ namespace ConsoleStdinHeeler
 
                 if (tag.StartsWith("color=", StringComparison.OrdinalIgnoreCase))
                 {
-                    string colorSpec = tag.Substring(6).Trim().Trim('"');
-                    string? ansiCode = GetAnsiColorCode(colorSpec);
+                    string colorSpecification = tag.Substring(6).Trim().Trim('"');
+                    string? ansiCode = GetAnsiColorCode(colorSpecification);
                     if (ansiCode != null)
                     {
                         appliedFormatting = true;
@@ -94,23 +94,23 @@ namespace ConsoleStdinHeeler
         /// </summary>
         public static List<string> ParseArguments(string input)
         {
-            var list = new List<string>();
+            List<string> list = new List<string>();
             if (string.IsNullOrWhiteSpace(input))
             {
                 return list;
             }
 
             bool inQuotes = false;
-            var current = new StringBuilder();
+            StringBuilder current = new StringBuilder();
 
-            for (int i = 0; i < input.Length; i++)
+            for (int index = 0; index < input.Length; index++)
             {
-                char c = input[i];
-                if (c == '"')
+                char character = input[index];
+                if (character == '"')
                 {
                     inQuotes = !inQuotes;
                 }
-                else if (c == ' ' && !inQuotes)
+                else if (character == ' ' && !inQuotes)
                 {
                     if (current.Length > 0)
                     {
@@ -120,7 +120,7 @@ namespace ConsoleStdinHeeler
                 }
                 else
                 {
-                    current.Append(c);
+                    current.Append(character);
                 }
             }
 
@@ -132,30 +132,30 @@ namespace ConsoleStdinHeeler
             return list;
         }
 
-        private static string? GetAnsiColorCode(string colorSpec)
+        private static string? GetAnsiColorCode(string colorSpecification)
         {
-            if (colorSpec.StartsWith("#"))
+            if (colorSpecification.StartsWith("#"))
             {
-                string hex = colorSpec.Substring(1);
-                if (hex.Length == 3) // #RGB
+                string hexDigits = colorSpecification.Substring(1);
+                if (hexDigits.Length == 3) // #RGB
                 {
-                    int r = Convert.ToInt32(new string(hex[0], 2), 16);
-                    int g = Convert.ToInt32(new string(hex[1], 2), 16);
-                    int b = Convert.ToInt32(new string(hex[2], 2), 16);
-                    return TerminalColor.FromRgb(r, g, b);
+                    int red = Convert.ToInt32(new string(hexDigits[0], 2), 16);
+                    int green = Convert.ToInt32(new string(hexDigits[1], 2), 16);
+                    int blue = Convert.ToInt32(new string(hexDigits[2], 2), 16);
+                    return TerminalColor.FromRgb(red, green, blue);
                 }
-                if (hex.Length >= 6) // #RRGGBB or #RRGGBBAA
+                if (hexDigits.Length >= 6) // #RRGGBB or #RRGGBBAA
                 {
-                    int r = Convert.ToInt32(hex.Substring(0, 2), 16);
-                    int g = Convert.ToInt32(hex.Substring(2, 2), 16);
-                    int b = Convert.ToInt32(hex.Substring(4, 2), 16);
-                    return TerminalColor.FromRgb(r, g, b);
+                    int red = Convert.ToInt32(hexDigits.Substring(0, 2), 16);
+                    int green = Convert.ToInt32(hexDigits.Substring(2, 2), 16);
+                    int blue = Convert.ToInt32(hexDigits.Substring(4, 2), 16);
+                    return TerminalColor.FromRgb(red, green, blue);
                 }
 
                 return null;
             }
 
-            return TerminalColor.FromName(colorSpec);
+            return TerminalColor.FromName(colorSpecification);
         }
     }
 }

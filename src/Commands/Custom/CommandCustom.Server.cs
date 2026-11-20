@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace ConsoleStdinHeeler
@@ -16,7 +17,7 @@ namespace ConsoleStdinHeeler
         /// </summary>
         public static void HandleSaveCommand()
         {
-            if (ZNet.instance == null || Game.instance == null || ZoneSystem.instance == null)
+            if (!ZNet.instance || !Game.instance || !ZoneSystem.instance)
             {
                 Plugin.Log.LogWarning("Cannot save: Server world is still loading. Please wait until startup completes.");
                 return;
@@ -77,12 +78,12 @@ namespace ConsoleStdinHeeler
             _isShutdownScheduled = true;
             _lastAnnouncedSecondsLeft = (int)(minutes * 60f);
 
-            string initialMsg = $"Server shutting down in {minutes:F0} min! Reason: {reason}";
+            string initialMessage = $"Server shutting down in {minutes:F0} min! Reason: {reason}";
             if (ZRoutedRpc.instance != null)
             {
-                ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.Everybody, "ShowMessage", (int)MessageHud.MessageType.Center, initialMsg);
+                ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.Everybody, "ShowMessage", (int)MessageHud.MessageType.Center, initialMessage);
             }
-            Plugin.Log.LogInfo($"{TerminalColor.Orange}{initialMsg}{TerminalColor.Reset}");
+            Plugin.Log.LogInfo($"{TerminalColor.Orange}{initialMessage}{TerminalColor.Reset}");
         }
 
         /// <summary>
@@ -90,23 +91,28 @@ namespace ConsoleStdinHeeler
         /// </summary>
         public static void HandlePlayersCommand()
         {
-            if (ZNet.instance == null || Game.instance == null)
+            if (!ZNet.instance || !Game.instance)
             {
                 Plugin.Log.LogWarning("Cannot list players: Server world is still loading.");
                 return;
             }
 
-            var connectedPeers = ZNet.instance.GetConnectedPeers();
+            List<ZNetPeer> connectedPeers = ZNet.instance.GetConnectedPeers();
             Plugin.Log.LogInfo($"{TerminalColor.Bold}{TerminalColor.Orange}=== Connected Players ({connectedPeers.Count}) ==={TerminalColor.Reset}");
 
             int playerNumber = 1;
             foreach (ZNetPeer peer in connectedPeers)
             {
-                string networkEndpoint = peer.m_socket?.GetHostName() ?? "unknown";
+                string networkEndpoint = peer.m_socket.GetHostName();
                 string playerName = string.IsNullOrEmpty(peer.m_playerName) ? "<connecting>" : peer.m_playerName;
-                float pingSeconds = peer.m_rpc != null ? peer.m_rpc.GetTimeSinceLastPing() : -1f;
-                string pingColor = pingSeconds < 0 ? TerminalColor.Gray : (pingSeconds < 2f ? TerminalColor.Green : (pingSeconds < 5f ? TerminalColor.Yellow : TerminalColor.Red));
-                string pingDisplay = pingSeconds >= 0 ? $"{pingSeconds * 1000f:F0}ms ago" : "n/a";
+                float pingSeconds = peer.m_rpc.GetTimeSinceLastPing();
+                string pingColor = pingSeconds switch
+                {
+                    < 2f => TerminalColor.Green,
+                    < 5f => TerminalColor.Yellow,
+                    _ => TerminalColor.Red
+                };
+                string pingDisplay = $"{pingSeconds * 1000f:F0}ms ago";
 
                 Plugin.Log.LogInfo($"  [{playerNumber}] {TerminalColor.Cyan}{playerName}{TerminalColor.Reset} | Last ping: {pingColor}{pingDisplay}{TerminalColor.Reset} | Endpoint: {TerminalColor.Gray}{networkEndpoint}{TerminalColor.Reset} | ID: {TerminalColor.Gray}{peer.m_characterID}{TerminalColor.Reset}");
                 playerNumber++;

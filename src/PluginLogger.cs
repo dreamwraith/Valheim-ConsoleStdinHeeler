@@ -15,14 +15,14 @@ namespace ConsoleStdinHeeler
 
         public PluginLogger(ManualLogSource underlying)
         {
-            _underlying = underlying ?? throw new ArgumentNullException(nameof(underlying));
+            _underlying = underlying;
         }
 
         public void LogInfo(object data) => _underlying.LogInfo(data);
 
         public void LogWarning(object data)
         {
-            string message = data?.ToString() ?? string.Empty;
+            string message = data.ToString();
             string formatted = message.StartsWith("Warning:", StringComparison.OrdinalIgnoreCase) ||
                                message.StartsWith("[Warning]", StringComparison.OrdinalIgnoreCase)
                 ? message
@@ -32,7 +32,7 @@ namespace ConsoleStdinHeeler
 
         public void LogError(object data)
         {
-            string message = data?.ToString() ?? string.Empty;
+            string message = data.ToString();
             string formatted = message.StartsWith("Error:", StringComparison.OrdinalIgnoreCase) ||
                                message.StartsWith("[Error]", StringComparison.OrdinalIgnoreCase) ||
                                message.StartsWith("Failed:", StringComparison.OrdinalIgnoreCase) ||
@@ -44,7 +44,7 @@ namespace ConsoleStdinHeeler
 
         public void LogDebug(object data)
         {
-            if (ModConfig.EnableDebugLogs?.Value == true)
+            if (ModConfig.EnableDebugLogs.Value)
             {
                 _underlying.LogInfo($"[DEBUG] {data}");
             }
