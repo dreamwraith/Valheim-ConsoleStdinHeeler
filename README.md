@@ -13,7 +13,7 @@
 [![License](https://img.shields.io/github/license/dreamwraith/Valheim-ConsoleStdinHeeler?color=blue)](LICENSE.md)
 [![AI Philosophy](https://img.shields.io/badge/AI%20Philosophy-Software%20Craft-2ea44f?logo=github)](https://gist.github.com/dreamwraith/77c91d656c842611bf8c40febf8056f2)
 
-Non-blocking STDIN console input and native server management commands for Valheim dedicated servers.
+Non-blocking STDIN console input and server management commands for Valheim dedicated servers.
 
 > [!NOTE]
 > **Dedicated Server Focused:** This mod is intended specifically for headless Valheim servers (Linux or Windows) running in interactive terminals, multiplexers (`screen`, `tmux`), systemd services, or Docker containers. It automatically remains dormant if loaded in a standard game client.
@@ -22,11 +22,9 @@ Non-blocking STDIN console input and native server management commands for Valhe
 
 ## The Problem
 
-In vanilla Valheim, dedicated servers running in headless mode (`valheim_server.exe` on Windows or `valheim_server.x86_64` on Linux) do not read from Standard Input (`STDIN`). Although logs and status messages print to standard output, server hosts cannot enter commands into the terminal or pipe commands into the server process.
+In the base game, dedicated servers running in headless mode (`valheim_server.exe` on Windows or `valheim_server.x86_64` on Linux) do not read from Standard Input (`STDIN`). Although logs and status messages print to standard output, server hosts cannot enter commands into the terminal or pipe commands into the server process.
 
-Furthermore:
-
-- **No Native Server Console Input**: Dedicated servers do not process interactive terminal input or piped streams. Server hosts cannot run commands locally without installing external RCON mods, game client admin connections, or remote management tools.
+- **No Server Console Input**: Dedicated servers do not process interactive terminal input or piped streams. Server hosts cannot run commands locally without installing external RCON mods, game client admin connections, or remote management tools.
 - **Missing Operational Commands**: The dedicated server binary lacks standard operational commands such as `shutdown`, `stop`, `kickall`, and countdown timers. Halting the server typically requires sending `SIGINT` (Ctrl+C) or killing the process. A forced kill risks incomplete saves.
 - **Main-Thread Blocking & EOF Spin Risks**: Synchronous reading on the main thread blocks the Unity game loop. Conversely, naive background readers without stream closure handling can rapidly enter spin loops and spike CPU usage when detached or running under non-interactive environments (e.g. systemd services or detached containers) where STDIN reaches EOF.
 
@@ -76,9 +74,9 @@ Furthermore:
 
 - **Mod Command Passthrough**: Unrecognized commands are passed to `Terminal.commands`, allowing console execution for installed developer and administration mods.
 - **Cheat Permission Elevation**: Sets `Terminal.m_cheat = true` during command dispatch when `EnableCheatsByDefault` is on, so cheat-flagged and administrative commands execute on dedicated servers.
-- **Command Filter**: About 100 base game commands that are not usable or not safe on a dedicated server (e.g. `god`, `fly`, `ghost`, `pos`, `beard`, `hair`, `fov`) are blocked by name with a warning. A mod command with the same name is blocked too.
+- **Command Filter**: About 130 base game commands that are not usable or not safe on a dedicated server (e.g. `god`, `fly`, `ghost`, `pos`, `beard`, `hair`, `fov`) are blocked by name with a warning. A mod command with the same name is blocked too.
 - **ANSI Color Formatting**: Translates Unity `<color=...>` tags into terminal ANSI colors with configurable display modes (`Ansi`, `Strip`, `Raw`).
-- **Command Reference (`help`)**: Displays dedicated server commands and auto-discovered mod commands, with `help all` exposing the full native command catalog.
+- **Command Reference (`help`)**: Displays dedicated server commands and auto-discovered mod commands, with `help all` showing the full base game command catalog.
 
 ---
 
@@ -109,7 +107,7 @@ Furthermore:
 | `timescale` | `<scale> [fadetime]` | Sets game simulation speed, up to 5. Optional fade in seconds. |
 | `ping` | *(none)* | Sends a test message from the server to itself. This does not measure player latency. Use `players` for per-player data. |
 | `info` | *(none)* | Prints render threading mode and managed memory use. |
-| `help` | *(optional: `all`)* | Shows dedicated server and mod commands. Use `help all` for the complete native command catalog. |
+| `help` | *(optional: `all`)* | Shows dedicated server and mod commands. Use `help all` for the full base game command catalog. |
 | *Modded Commands* | *(varies)* | Commands registered by installed BepInEx mods execute directly. |
 
 ### World and Maintenance Commands
@@ -138,7 +136,7 @@ Coordinates are `x,y,z` or `x,z` with no spaces. With `x,z`, height comes from t
 > [!TIP]
 > **Player Targeting & `@random`:** Any command accepting a player target (`tp`, `say`, `announce`, `spawn`, `event`, `findlocation`) supports `@random` to select a connected player at random.
 >
-> **Command Filter:** About 100 base game commands that are not usable or not safe on a dedicated server (e.g. `god`, `fly`, `goto`, `pos`, `beard`) are blocked by name with a warning. A mod command with the same name is blocked too.
+> **Command Filter:** About 130 base game commands that are not usable or not safe on a dedicated server (e.g. `god`, `fly`, `goto`, `pos`, `beard`) are blocked by name with a warning. A mod command with the same name is blocked too.
 
 ---
 
@@ -183,7 +181,7 @@ If run detached without `-i`, the reader detects EOF and terminates the thread.
 
 - **Dedicated Servers**: Built specifically for headless dedicated servers (`valheim_server.exe` on Windows or `valheim_server.x86_64` on Linux). Safely disables itself if launched within a standard game client.
 - **Server Administration & Dev Mods**: Compatible with server management and developer mods, including **WorldEditCommands**, **ServerDevcommands**, and **InfinityHammer**.
-- **Vanilla Game Terminal**: Passes through native Valheim terminal and server utilities (`ping`, `info`, `genloc`, `optterrain`, `listkeys`, etc.).
+- **Base Game Terminal**: Passes through base game terminal and server utilities (`ping`, `info`, `genloc`, `optterrain`, `listkeys`, etc.).
 - **Interactive Multiplexers & Containers**: Compatible with `screen`, `tmux`, systemd service units, Windows Command Prompt/PowerShell, and interactive Docker containers.
 - **Mod Managers**: Works with **Gale**, **Thunderstore Mod Manager**, and **r2modman**.
 

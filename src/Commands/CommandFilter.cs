@@ -35,7 +35,7 @@ namespace ConsoleStdinHeeler
             // Player-position dependent commands (require Player.m_localPlayer.transform.position)
             "biomeinfo", "haslocation", "printlocations", "printnetobj", "printcreatures", "recall",
             "vegetation", "height", "forcedelete", "snow", "location",
-            "find", "findbiome", "findbiometp", "findtp",
+            "find", "findbiome", "findbiometp", "findtp", "fixhalfdegrotpieces",
 
             // Silent no-ops, late-crashing, or dangerous commands on dedicated server
             "stopfire", "stopsmoke", "setfuel", "printseeds", "noportals",
